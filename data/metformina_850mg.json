@@ -1,0 +1,115 @@
+{
+  "query": "Metformina 850mg",
+  "generated_at": "2026-03-31T13:11:58.561388+00:00",
+  "count": 12,
+  "results": [
+    {
+      "pharmacy": "Cruz Verde",
+      "drug_name": "Metformina 850 mg 60 Comprimidos",
+      "price_clp": 5661,
+      "original_price_clp": 6290,
+      "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg",
+      "product_url": "https://www.cruzverde.cl/metformina-850-mg-60-comprimidos/270505.html",
+      "scraped_at": "2026-03-31T13:11:58.148378+00:00"
+    },
+    {
+      "pharmacy": "Cruz Verde",
+      "drug_name": "Metformina 850 mg 30 Comprimidos",
+      "price_clp": 3051,
+      "original_price_clp": 3390,
+      "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg",
+      "product_url": "https://www.cruzverde.cl/metformina-850-mg-30-comprimidos/270506.html",
+      "scraped_at": "2026-03-31T13:11:58.148378+00:00"
+    },
+    {
+      "pharmacy": "Cruz Verde",
+      "drug_name": "Glimefor 850 Metformina 850 mg 60 Comprimidos Recubiertos",
+      "price_clp": 12861,
+      "original_price_clp": 14290,
+      "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg",
+      "product_url": "https://www.cruzverde.cl/glimefor-850-metformina-850-mg-60-comprimidos-recubiertos/298015.html",
+      "scraped_at": "2026-03-31T13:11:58.148378+00:00"
+    },
+    {
+      "pharmacy": "Cruz Verde",
+      "drug_name": "Glimefor 850 Metformina 850 mg 30 Comprimidos Recubiertos",
+      "price_clp": 5751,
+      "original_price_clp": 6390,
+      "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg",
+      "product_url": "https://www.cruzverde.cl/glimefor-850-metformina-850-mg-30-comprimidos-recubiertos/298014.html",
+      "scraped_at": "2026-03-31T13:11:58.148378+00:00"
+    },
+    {
+      "pharmacy": "Cruz Verde",
+      "drug_name": "Glaupax 850 Metformina 850 mg 30 Comprimidos Recubiertos",
+      "price_clp": 5518,
+      "original_price_clp": 8490,
+      "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg",
+      "product_url": "https://www.cruzverde.cl/glaupax-850-metformina-850-mg-30-comprimidos-recubiertos/272943.html",
+      "scraped_at": "2026-03-31T13:11:58.148378+00:00"
+    },
+    {
+      "pharmacy": "Cruz Verde",
+      "drug_name": "Glucophage Metformina 850 mg 30 Comprimidos",
+      "price_clp": 13221,
+      "original_price_clp": 20340,
+      "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg",
+      "product_url": "https://www.cruzverde.cl/glucophage-metformina-850-mg-30-comprimidos/57169.html",
+      "scraped_at": "2026-03-31T13:11:58.148378+00:00"
+    },
+    {
+      "pharmacy": "Cruz Verde",
+      "drug_name": "Glifortex Metformina 850 mg 30 Comprimidos",
+      "price_clp": 16326,
+      "original_price_clp": 18140,
+      "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg",
+      "product_url": "https://www.cruzverde.cl/glifortex-metformina-850-mg-30-comprimidos/15401.html",
+      "scraped_at": "2026-03-31T13:11:58.148378+00:00"
+    },
+    {
+      "pharmacy": "Cruz Verde",
+      "drug_name": "Glafornil Metformina 850 mg 30 Comprimidos Recubiertos",
+      "price_clp": 15008,
+      "original_price_clp": 23090,
+      "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg",
+      "product_url": "https://www.cruzverde.cl/glafornil-metformina-850-mg-30-comprimidos-recubiertos/11084.html",
+      "scraped_at": "2026-03-31T13:11:58.148378+00:00"
+    },
+    {
+      "pharmacy": "Cruz Verde",
+      "drug_name": "Glafornil Metformina 850 mg 60 Comprimidos Recubiertos",
+      "price_clp": 19493,
+      "original_price_clp": 29990,
+      "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg",
+      "product_url": "https://www.cruzverde.cl/glafornil-metformina-850-mg-60-comprimidos-recubiertos/11085.html",
+      "scraped_at": "2026-03-31T13:11:58.148378+00:00"
+    },
+    {
+      "pharmacy": "Cruz Verde",
+      "drug_name": "Glicenex Metformina 850 mg 30 Comprimidos Recubiertos",
+      "price_clp": 7923,
+      "original_price_clp": 12190,
+      "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg",
+      "product_url": "https://www.cruzverde.cl/glicenex-metformina-850-mg-30-comprimidos-recubiertos/255612.html",
+      "scraped_at": "2026-03-31T13:11:58.148378+00:00"
+    },
+    {
+      "pharmacy": "Cruz Verde",
+      "drug_name": "Hipoglucin Metformina 850 mg 60 Comprimidos Recubiertos",
+      "price_clp": 21411,
+      "original_price_clp": 23790,
+      "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg",
+      "product_url": "https://www.cruzverde.cl/hipoglucin-metformina-850-mg-60-comprimidos-recubiertos/1282.html",
+      "scraped_at": "2026-03-31T13:11:58.148378+00:00"
+    },
+    {
+      "pharmacy": "Cruz Verde",
+      "drug_name": "Vildagliptina 50 mg Metformina Clorhidrato 850 mg 60 Comprimidos",
+      "price_clp": 36263,
+      "original_price_clp": 55790,
+      "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg",
+      "product_url": "https://www.cruzverde.cl/vildagliptina-50-mg-metformina-clorhidrato-850-mg-60-comprimidos/538672.html",
+      "scraped_at": "2026-03-31T13:11:58.148378+00:00"
+    }
+  ]
+}
