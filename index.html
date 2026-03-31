@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Comparador de Precios — Farmacias Chile</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f4f6f9;
+      color: #1a1a2e;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #16213e;
+      color: #fff;
+      padding: 1.5rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    header h1 { font-size: 1.4rem; font-weight: 700; }
+    header p  { font-size: 0.85rem; color: #a0aec0; margin-top: 0.2rem; }
+
+    .pill {
+      background: #e53e3e;
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    main { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+
+    .meta {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 1rem 1.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .meta strong { font-size: 1.1rem; }
+    .meta .timestamp { font-size: 0.8rem; color: #718096; }
+
+    .stats { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .stat-card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 1rem 1.5rem;
+      flex: 1;
+      min-width: 160px;
+      text-align: center;
+    }
+    .stat-card .value { font-size: 1.8rem; font-weight: 700; color: #2d3748; }
+    .stat-card .label { font-size: 0.75rem; color: #718096; margin-top: 0.2rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .stat-card.best .value { color: #276749; }
+    .stat-card.worst .value { color: #c53030; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+    }
+    thead { background: #2d3748; color: #fff; }
+    th { padding: 0.85rem 1.2rem; text-align: left; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; }
+    td { padding: 0.85rem 1.2rem; border-bottom: 1px solid #edf2f7; font-size: 0.95rem; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f7fafc; }
+    .price { font-weight: 700; font-size: 1.05rem; }
+    .badge-best { background: #c6f6d5; color: #276749; font-size: 0.7rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 999px; margin-left: 0.5rem; }
+    .pharmacy-tag { display: inline-block; background: #ebf8ff; color: #2b6cb0; font-size: 0.78rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 6px; }
+
+    .empty {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 3rem;
+      text-align: center;
+      color: #718096;
+    }
+    .empty code { background: #edf2f7; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.9rem; }
+
+    footer {
+      text-align: center;
+      color: #a0aec0;
+      font-size: 0.78rem;
+      padding: 2rem 1rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Comparador de Precios de Farmacias</h1>
+    <p>Transparencia en precios de medicamentos — Chile</p>
+  </div>
+  <span class="pill">Beta</span>
+</header>
+
+<main>
+  <div class="meta">
+    <div>
+      Búsqueda: <strong id="query-label">—</strong>
+    </div>
+    <div class="timestamp" id="timestamp-label">—</div>
+  </div>
+
+  <div class="stats" id="stats-row" style="display:none">
+    <div class="stat-card"><div class="value" id="stat-count">—</div><div class="label">Resultados</div></div>
+    <div class="stat-card best"><div class="value" id="stat-min">—</div><div class="label">Precio más bajo</div></div>
+    <div class="stat-card worst"><div class="value" id="stat-max">—</div><div class="label">Precio más alto</div></div>
+    <div class="stat-card"><div class="value" id="stat-diff">—</div><div class="label">Diferencia máx.</div></div>
+  </div>
+
+  <div id="content">
+    <div class="empty">
+      <p>No hay datos cargados.</p>
+      <p style="margin-top:0.5rem">Ejecuta el scraper primero:</p>
+      <p style="margin-top:0.5rem"><code>python scraper.py "Metformina 850mg"</code></p>
+    </div>
+  </div>
+</main>
+
+<footer>
+  Datos obtenidos mediante scraping público &nbsp;•&nbsp; Actualizado periódicamente &nbsp;•&nbsp; No afiliado a ninguna farmacia
+</footer>
+
+<!-- INLINE_DATA_START -->
+<script>window.SCRAPED_DATA = {"query": "Metformina 850mg", "generated_at": "2026-03-30T23:55:01.170209+00:00", "count": 12, "results": [{"pharmacy": "Cruz Verde", "drug_name": "Metformina 850 mg 60 Comprimidos", "price_clp": 5032, "original_price_clp": 6290, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Metformina 850 mg 30 Comprimidos", "price_clp": 2712, "original_price_clp": 3390, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Glimefor 850 Metformina 850 mg 60 Comprimidos Recubiertos", "price_clp": 10003, "original_price_clp": 14290, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Glimefor 850 Metformina 850 mg 30 Comprimidos Recubiertos", "price_clp": 4473, "original_price_clp": 6390, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Glaupax 850 Metformina 850 mg 30 Comprimidos Recubiertos", "price_clp": 5518, "original_price_clp": 8490, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Glucophage Metformina 850 mg 30 Comprimidos", "price_clp": 13221, "original_price_clp": 20340, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Glifortex Metformina 850 mg 30 Comprimidos", "price_clp": 12698, "original_price_clp": 18140, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Glafornil Metformina 850 mg 30 Comprimidos Recubiertos", "price_clp": 15008, "original_price_clp": 23090, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Glafornil Metformina 850 mg 60 Comprimidos Recubiertos", "price_clp": 19493, "original_price_clp": 29990, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Glicenex Metformina 850 mg 30 Comprimidos Recubiertos", "price_clp": 7923, "original_price_clp": 12190, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Hipoglucin Metformina 850 mg 60 Comprimidos Recubiertos", "price_clp": 16653, "original_price_clp": 23790, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Vildagliptina 50 mg Metformina Clorhidrato 850 mg 60 Comprimidos", "price_clp": 36263, "original_price_clp": 55790, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}]};</script>
+<!-- INLINE_DATA_END -->
+<script>
+  const DATA_FILE = "data/metformina_850mg.json";  // fallback when served via HTTP
+
+  function formatCLP(n) {
+    return "$" + n.toLocaleString("es-CL");
+  }
+
+  function formatDate(iso) {
+    return new Date(iso).toLocaleString("es-CL", {
+      day: "2-digit", month: "2-digit", year: "numeric",
+      hour: "2-digit", minute: "2-digit"
+    });
+  }
+
+  async function loadData() {
+    let payload;
+    // Use embedded data if available (no server needed), else fetch from disk
+    if (window.SCRAPED_DATA) {
+      payload = window.SCRAPED_DATA;
+    } else {
+      try {
+        const resp = await fetch(DATA_FILE);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        payload = await resp.json();
+      } catch (e) {
+        return; // keep the empty state
+      }
+    }
+
+    document.getElementById("query-label").textContent = payload.query || "—";
+    document.getElementById("timestamp-label").textContent =
+      payload.generated_at ? "Actualizado: " + formatDate(payload.generated_at) : "";
+
+    const results = payload.results || [];
+    if (!results.length) return;
+
+    // Stats
+    const prices = results.map(r => r.price_clp).filter(Boolean);
+    const minPrice = Math.min(...prices);
+    const maxPrice = Math.max(...prices);
+    document.getElementById("stat-count").textContent = results.length;
+    document.getElementById("stat-min").textContent = formatCLP(minPrice);
+    document.getElementById("stat-max").textContent = formatCLP(maxPrice);
+    document.getElementById("stat-diff").textContent = formatCLP(maxPrice - minPrice);
+    document.getElementById("stats-row").style.display = "flex";
+
+    // Sort cheapest first
+    results.sort((a, b) => (a.price_clp || 0) - (b.price_clp || 0));
+
+    const rows = results.map((r, i) => `
+      <tr>
+        <td>${r.drug_name}</td>
+        <td><span class="pharmacy-tag">${r.pharmacy}</span></td>
+        <td class="price">
+          ${r.price_clp ? formatCLP(r.price_clp) : "—"}
+          ${i === 0 ? '<span class="badge-best">Mejor precio</span>' : ""}
+        </td>
+      </tr>
+    `).join("");
+
+    document.getElementById("content").innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>Medicamento</th>
+            <th>Farmacia</th>
+            <th>Precio (CLP)</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+  }
+
+  loadData();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "farmacia-comparador",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["/tmp/farmacia_serve.py"],
+      "port": 8765
+    }
+  ]
+}
