@@ -3,222 +3,928 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Comparador de Precios — Farmacias Chile</title>
+  <title>farmaciasbaratas.cl — Compara precios de medicamentos en Chile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #f4f6f9;
-      color: #1a1a2e;
-      min-height: 100vh;
+    /* ── Variables ─────────────────────────────────────────────── */
+    :root {
+      --blue-50:  #f0f9ff;
+      --blue-100: #e0f2fe;
+      --blue-200: #bae6fd;
+      --blue-400: #38bdf8;
+      --blue-500: #0ea5e9;
+      --blue-600: #0284c7;
+      --blue-700: #0369a1;
+      --teal-400: #2dd4bf;
+      --teal-500: #14b8a6;
+      --teal-600: #0d9488;
+      --green-100:#dcfce7;
+      --green-600:#16a34a;
+      --green-700:#15803d;
+      --gray-50:  #f8fafc;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-300: #cbd5e1;
+      --gray-400: #94a3b8;
+      --gray-500: #64748b;
+      --gray-600: #475569;
+      --gray-700: #334155;
+      --gray-800: #1e293b;
+      --gray-900: #0f172a;
+      --white:    #ffffff;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,.05);
+      --shadow:    0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+      --shadow-md: 0 4px 6px rgba(0,0,0,.06), 0 2px 4px rgba(0,0,0,.04);
+      --shadow-lg: 0 10px 15px rgba(0,0,0,.06), 0 4px 6px rgba(0,0,0,.04);
+      --radius-sm: 8px;
+      --radius:    12px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
     }
 
+    /* ── Reset ─────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--gray-50);
+      color: var(--gray-800);
+      min-height: 100vh;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Header ────────────────────────────────────────────────── */
     header {
-      background: #16213e;
-      color: #fff;
-      padding: 1.5rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--gray-200);
+      box-shadow: var(--shadow-sm);
+    }
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      height: 64px;
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 1rem;
     }
-    header h1 { font-size: 1.4rem; font-weight: 700; }
-    header p  { font-size: 0.85rem; color: #a0aec0; margin-top: 0.2rem; }
-
-    .pill {
-      background: #e53e3e;
-      color: #fff;
-      font-size: 0.7rem;
-      font-weight: 700;
-      padding: 0.2rem 0.6rem;
-      border-radius: 999px;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-    }
-
-    main { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
-
-    .meta {
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      border-radius: 10px;
-      padding: 1rem 1.5rem;
-      margin-bottom: 1.5rem;
+    .logo {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
       gap: 0.5rem;
+      text-decoration: none;
     }
-    .meta strong { font-size: 1.1rem; }
-    .meta .timestamp { font-size: 0.8rem; color: #718096; }
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--blue-500), var(--teal-500));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .logo-icon svg { width: 18px; height: 18px; fill: white; }
+    .logo-text {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      letter-spacing: -0.02em;
+    }
+    .logo-text span { color: var(--blue-500); }
+    .badge-beta {
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      background: var(--blue-100);
+      color: var(--blue-600);
+      padding: .2rem .55rem;
+      border-radius: 999px;
+    }
 
-    .stats { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
-    .stat-card {
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      border-radius: 10px;
-      padding: 1rem 1.5rem;
-      flex: 1;
-      min-width: 160px;
+    /* ── Hero / Search ─────────────────────────────────────────── */
+    .hero {
+      background: linear-gradient(160deg, var(--blue-50) 0%, var(--white) 60%);
+      padding: 3rem 1.5rem 2.5rem;
       text-align: center;
+      border-bottom: 1px solid var(--gray-200);
     }
-    .stat-card .value { font-size: 1.8rem; font-weight: 700; color: #2d3748; }
-    .stat-card .label { font-size: 0.75rem; color: #718096; margin-top: 0.2rem; text-transform: uppercase; letter-spacing: 0.05em; }
-    .stat-card.best .value { color: #276749; }
-    .stat-card.worst .value { color: #c53030; }
+    .hero h2 {
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-weight: 700;
+      color: var(--gray-900);
+      letter-spacing: -.03em;
+      margin-bottom: .5rem;
+    }
+    .hero p {
+      font-size: .95rem;
+      color: var(--gray-500);
+      margin-bottom: 1.75rem;
+    }
 
+    .search-wrapper {
+      position: relative;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+    .search-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+      color: var(--gray-400);
+      pointer-events: none;
+    }
+    #search-input {
+      width: 100%;
+      padding: .875rem 1rem .875rem 3rem;
+      font-size: 1rem;
+      font-family: inherit;
+      border: 2px solid var(--gray-200);
+      border-radius: var(--radius-lg);
+      background: var(--white);
+      color: var(--gray-900);
+      box-shadow: var(--shadow-md);
+      transition: border-color .15s, box-shadow .15s;
+      outline: none;
+    }
+    #search-input:focus {
+      border-color: var(--blue-400);
+      box-shadow: 0 0 0 4px rgba(14,165,233,.12), var(--shadow-md);
+    }
+    #search-input::placeholder { color: var(--gray-400); }
+
+    .autocomplete-dropdown {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0; right: 0;
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      z-index: 200;
+      overflow: hidden;
+      display: none;
+    }
+    .autocomplete-dropdown.open { display: block; }
+    .autocomplete-item {
+      padding: .7rem 1.1rem;
+      cursor: pointer;
+      font-size: .9rem;
+      color: var(--gray-700);
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      transition: background .1s;
+    }
+    .autocomplete-item:hover, .autocomplete-item.active {
+      background: var(--blue-50);
+      color: var(--blue-700);
+    }
+    .autocomplete-item svg { width: 15px; height: 15px; flex-shrink: 0; opacity: .5; }
+
+    /* ── Layout ────────────────────────────────────────────────── */
+    .page {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    /* ── Stats row ─────────────────────────────────────────────── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .stat-card {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      padding: 1.1rem 1.25rem;
+      box-shadow: var(--shadow);
+    }
+    .stat-card .s-label {
+      font-size: .72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--gray-400);
+      margin-bottom: .3rem;
+    }
+    .stat-card .s-value {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      letter-spacing: -.02em;
+    }
+    .stat-card.best .s-value  { color: var(--teal-600); }
+    .stat-card.worst .s-value { color: #ef4444; }
+    .stat-card.diff .s-value  { color: var(--blue-600); }
+
+    /* ── Filters bar ───────────────────────────────────────────── */
+    .filters-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .75rem;
+      align-items: center;
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      padding: .85rem 1.25rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.25rem;
+    }
+    .filters-bar label {
+      font-size: .78rem;
+      font-weight: 600;
+      color: var(--gray-500);
+      white-space: nowrap;
+    }
+    .filter-select {
+      padding: .45rem .85rem;
+      font-size: .85rem;
+      font-family: inherit;
+      border: 1.5px solid var(--gray-200);
+      border-radius: var(--radius-sm);
+      background: var(--gray-50);
+      color: var(--gray-700);
+      cursor: pointer;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .filter-select:focus { border-color: var(--blue-400); }
+    .filters-bar .separator {
+      width: 1px;
+      height: 24px;
+      background: var(--gray-200);
+      margin: 0 .25rem;
+    }
+    .sort-btn {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      padding: .45rem .9rem;
+      font-size: .82rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: 1.5px solid var(--gray-200);
+      border-radius: var(--radius-sm);
+      background: var(--gray-50);
+      color: var(--gray-600);
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .sort-btn:hover { border-color: var(--blue-400); color: var(--blue-600); background: var(--blue-50); }
+    .sort-btn svg { width: 14px; height: 14px; transition: transform .2s; }
+    .sort-btn.desc svg { transform: rotate(180deg); }
+    .results-count {
+      margin-left: auto;
+      font-size: .82rem;
+      color: var(--gray-400);
+    }
+
+    /* ── Table ─────────────────────────────────────────────────── */
+    .table-wrap {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
     table {
       width: 100%;
       border-collapse: collapse;
-      background: #fff;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.07);
     }
-    thead { background: #2d3748; color: #fff; }
-    th { padding: 0.85rem 1.2rem; text-align: left; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; }
-    td { padding: 0.85rem 1.2rem; border-bottom: 1px solid #edf2f7; font-size: 0.95rem; }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: #f7fafc; }
-    .price { font-weight: 700; font-size: 1.05rem; }
-    .badge-best { background: #c6f6d5; color: #276749; font-size: 0.7rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 999px; margin-left: 0.5rem; }
-    .pharmacy-tag { display: inline-block; background: #ebf8ff; color: #2b6cb0; font-size: 0.78rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 6px; }
+    thead {
+      background: var(--gray-50);
+      border-bottom: 2px solid var(--gray-200);
+    }
+    th {
+      padding: .75rem 1.1rem;
+      text-align: left;
+      font-size: .72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--gray-500);
+      white-space: nowrap;
+    }
+    tbody tr {
+      border-bottom: 1px solid var(--gray-100);
+      transition: background .1s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:nth-child(even) { background: rgba(248,250,252,.6); }
+    tbody tr:hover { background: var(--blue-50); }
+    td {
+      padding: .85rem 1.1rem;
+      font-size: .9rem;
+      color: var(--gray-700);
+      vertical-align: middle;
+    }
 
-    .empty {
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      border-radius: 10px;
-      padding: 3rem;
+    .drug-name {
+      font-weight: 500;
+      color: var(--gray-900);
+      font-size: .9rem;
+    }
+    .drug-generic {
+      font-size: .75rem;
+      color: var(--gray-400);
+      margin-top: .1rem;
+    }
+
+    .brand-tag {
+      display: inline-block;
+      background: var(--gray-100);
+      color: var(--gray-600);
+      font-size: .75rem;
+      font-weight: 500;
+      padding: .2rem .6rem;
+      border-radius: 6px;
+    }
+
+    .lab-tag {
+      font-size: .82rem;
+      color: var(--gray-500);
+    }
+
+    .pharmacy-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: .3rem;
+      background: var(--blue-50);
+      color: var(--blue-700);
+      font-size: .78rem;
+      font-weight: 600;
+      padding: .25rem .7rem;
+      border-radius: 999px;
+    }
+    .pharmacy-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--blue-400);
+    }
+
+    .price-cell {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      flex-wrap: wrap;
+    }
+    .price-amount {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      letter-spacing: -.01em;
+    }
+    .price-original {
+      font-size: .78rem;
+      color: var(--gray-400);
+      text-decoration: line-through;
+    }
+    .badge-best {
+      display: inline-flex;
+      align-items: center;
+      gap: .25rem;
+      background: var(--green-100);
+      color: var(--green-700);
+      font-size: .68rem;
+      font-weight: 700;
+      padding: .2rem .55rem;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      white-space: nowrap;
+    }
+    .badge-best::before {
+      content: '★';
+      font-size: .7rem;
+    }
+
+    .btn-buy {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      padding: .45rem .9rem;
+      font-size: .8rem;
+      font-weight: 600;
+      font-family: inherit;
+      background: var(--blue-500);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      text-decoration: none;
+      transition: background .15s, transform .1s, box-shadow .15s;
+      white-space: nowrap;
+      box-shadow: 0 1px 2px rgba(14,165,233,.3);
+    }
+    .btn-buy:hover {
+      background: var(--blue-600);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(14,165,233,.25);
+    }
+    .btn-buy:active { transform: translateY(0); }
+    .btn-buy svg { width: 13px; height: 13px; }
+
+    /* ── Empty state ───────────────────────────────────────────── */
+    .empty-state {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-lg);
+      padding: 4rem 2rem;
       text-align: center;
-      color: #718096;
+      box-shadow: var(--shadow);
     }
-    .empty code { background: #edf2f7; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.9rem; }
+    .empty-icon {
+      width: 56px; height: 56px;
+      background: var(--gray-100);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.25rem;
+    }
+    .empty-icon svg { width: 26px; height: 26px; color: var(--gray-400); }
+    .empty-state h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--gray-700);
+      margin-bottom: .4rem;
+    }
+    .empty-state p { font-size: .88rem; color: var(--gray-400); }
+    .empty-state code {
+      display: inline-block;
+      margin-top: .75rem;
+      background: var(--gray-100);
+      color: var(--gray-600);
+      padding: .35rem .75rem;
+      border-radius: var(--radius-sm);
+      font-size: .82rem;
+      font-family: 'SFMono-Regular', Consolas, monospace;
+    }
 
+    /* ── Footer ────────────────────────────────────────────────── */
     footer {
+      border-top: 1px solid var(--gray-200);
+      padding: 1.75rem 1.5rem;
       text-align: center;
-      color: #a0aec0;
-      font-size: 0.78rem;
-      padding: 2rem 1rem;
+      font-size: .78rem;
+      color: var(--gray-400);
+    }
+    footer a { color: var(--blue-500); text-decoration: none; }
+
+    /* ── Timestamp bar ─────────────────────────────────────────── */
+    .meta-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: .5rem;
+      margin-bottom: 1.25rem;
+    }
+    .meta-query {
+      font-size: .9rem;
+      color: var(--gray-500);
+    }
+    .meta-query strong { color: var(--gray-900); font-weight: 600; }
+    .meta-time {
+      display: flex;
+      align-items: center;
+      gap: .35rem;
+      font-size: .78rem;
+      color: var(--gray-400);
+    }
+    .meta-time svg { width: 13px; height: 13px; }
+
+    /* ── Responsive ────────────────────────────────────────────── */
+    @media (max-width: 1024px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .hero { padding: 2rem 1rem 1.75rem; }
+      .page { padding: 1.25rem 1rem 3rem; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); gap: .75rem; }
+      .table-wrap { overflow-x: auto; }
+      table { min-width: 640px; }
+      .col-lab { display: none; }
+      .filters-bar { padding: .75rem 1rem; }
+      .results-count { width: 100%; text-align: right; }
+    }
+    @media (max-width: 480px) {
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .stat-card .s-value { font-size: 1.15rem; }
+      .logo-text { font-size: .95rem; }
     }
   </style>
 </head>
 <body>
 
+<!-- ── Header ──────────────────────────────────────────────────── -->
 <header>
-  <div>
-    <h1>Comparador de Precios de Farmacias</h1>
-    <p>Transparencia en precios de medicamentos — Chile</p>
+  <div class="header-inner">
+    <a href="/" class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-7 3a1 1 0 011 1v3h3a1 1 0 010 2h-3v3a1 1 0 01-2 0v-3H8a1 1 0 010-2h3V7a1 1 0 011-1z"/></svg>
+      </div>
+      <span class="logo-text">farmacias<span>baratas</span>.cl</span>
+    </a>
+    <span class="badge-beta">Beta</span>
   </div>
-  <span class="pill">Beta</span>
 </header>
 
-<main>
-  <div class="meta">
-    <div>
-      Búsqueda: <strong id="query-label">—</strong>
+<!-- ── Hero / Search ───────────────────────────────────────────── -->
+<section class="hero">
+  <h2>Compara precios de medicamentos en Chile</h2>
+  <p>Ahorra buscando el precio más bajo entre las principales farmacias</p>
+
+  <div class="search-wrapper">
+    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+    </svg>
+    <input
+      type="text"
+      id="search-input"
+      placeholder="Buscar medicamento… ej: Metformina 850mg"
+      autocomplete="off"
+      spellcheck="false"
+    />
+    <div class="autocomplete-dropdown" id="autocomplete-dropdown"></div>
+  </div>
+</section>
+
+<!-- ── Main ────────────────────────────────────────────────────── -->
+<main class="page">
+
+  <!-- Meta bar -->
+  <div class="meta-bar" id="meta-bar" style="display:none">
+    <div class="meta-query">Resultados para <strong id="query-label">—</strong></div>
+    <div class="meta-time">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+      </svg>
+      <span id="timestamp-label">—</span>
     </div>
-    <div class="timestamp" id="timestamp-label">—</div>
   </div>
 
-  <div class="stats" id="stats-row" style="display:none">
-    <div class="stat-card"><div class="value" id="stat-count">—</div><div class="label">Resultados</div></div>
-    <div class="stat-card best"><div class="value" id="stat-min">—</div><div class="label">Precio más bajo</div></div>
-    <div class="stat-card worst"><div class="value" id="stat-max">—</div><div class="label">Precio más alto</div></div>
-    <div class="stat-card"><div class="value" id="stat-diff">—</div><div class="label">Diferencia máx.</div></div>
+  <!-- Stats -->
+  <div class="stats-row" id="stats-row" style="display:none">
+    <div class="stat-card">
+      <div class="s-label">Resultados</div>
+      <div class="s-value" id="stat-count">—</div>
+    </div>
+    <div class="stat-card best">
+      <div class="s-label">Precio más bajo</div>
+      <div class="s-value" id="stat-min">—</div>
+    </div>
+    <div class="stat-card worst">
+      <div class="s-label">Precio más alto</div>
+      <div class="s-value" id="stat-max">—</div>
+    </div>
+    <div class="stat-card diff">
+      <div class="s-label">Diferencia máx.</div>
+      <div class="s-value" id="stat-diff">—</div>
+    </div>
   </div>
 
+  <!-- Filters -->
+  <div class="filters-bar" id="filters-bar" style="display:none">
+    <label for="filter-lab">Laboratorio</label>
+    <select class="filter-select" id="filter-lab">
+      <option value="">Todos</option>
+    </select>
+
+    <label for="filter-farm">Farmacia</label>
+    <select class="filter-select" id="filter-farm">
+      <option value="">Todas</option>
+    </select>
+
+    <div class="separator"></div>
+
+    <button class="sort-btn" id="sort-btn" title="Ordenar por precio">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 6h18M7 12h10M11 18h2"/>
+      </svg>
+      Precio: menor primero
+    </button>
+
+    <span class="results-count" id="results-count"></span>
+  </div>
+
+  <!-- Content -->
   <div id="content">
-    <div class="empty">
-      <p>No hay datos cargados.</p>
-      <p style="margin-top:0.5rem">Ejecuta el scraper primero:</p>
-      <p style="margin-top:0.5rem"><code>python scraper.py "Metformina 850mg"</code></p>
+    <div class="empty-state">
+      <div class="empty-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+        </svg>
+      </div>
+      <h3>Busca un medicamento</h3>
+      <p>Escribe en el buscador o ejecuta el scraper para cargar datos.</p>
+      <code>python scraper.py "Metformina 850mg"</code>
     </div>
   </div>
+
 </main>
 
+<!-- ── Footer ──────────────────────────────────────────────────── -->
 <footer>
-  Datos obtenidos mediante scraping público &nbsp;•&nbsp; Actualizado periódicamente &nbsp;•&nbsp; No afiliado a ninguna farmacia
+  Datos obtenidos mediante scraping público &nbsp;·&nbsp;
+  Actualizado periódicamente &nbsp;·&nbsp;
+  No afiliado a ninguna farmacia &nbsp;·&nbsp;
+  <a href="https://github.com/Lanhoso/farmacia-comparador" target="_blank" rel="noopener">GitHub</a>
 </footer>
 
+<!-- ── Data ────────────────────────────────────────────────────── -->
 <!-- INLINE_DATA_START -->
 <script>window.SCRAPED_DATA = {"query": "Metformina 850mg", "generated_at": "2026-03-30T23:55:01.170209+00:00", "count": 12, "results": [{"pharmacy": "Cruz Verde", "drug_name": "Metformina 850 mg 60 Comprimidos", "price_clp": 5032, "original_price_clp": 6290, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Metformina 850 mg 30 Comprimidos", "price_clp": 2712, "original_price_clp": 3390, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Glimefor 850 Metformina 850 mg 60 Comprimidos Recubiertos", "price_clp": 10003, "original_price_clp": 14290, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Glimefor 850 Metformina 850 mg 30 Comprimidos Recubiertos", "price_clp": 4473, "original_price_clp": 6390, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Glaupax 850 Metformina 850 mg 30 Comprimidos Recubiertos", "price_clp": 5518, "original_price_clp": 8490, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Glucophage Metformina 850 mg 30 Comprimidos", "price_clp": 13221, "original_price_clp": 20340, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Glifortex Metformina 850 mg 30 Comprimidos", "price_clp": 12698, "original_price_clp": 18140, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Glafornil Metformina 850 mg 30 Comprimidos Recubiertos", "price_clp": 15008, "original_price_clp": 23090, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Glafornil Metformina 850 mg 60 Comprimidos Recubiertos", "price_clp": 19493, "original_price_clp": 29990, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Glicenex Metformina 850 mg 30 Comprimidos Recubiertos", "price_clp": 7923, "original_price_clp": 12190, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Hipoglucin Metformina 850 mg 60 Comprimidos Recubiertos", "price_clp": 16653, "original_price_clp": 23790, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Vildagliptina 50 mg Metformina Clorhidrato 850 mg 60 Comprimidos", "price_clp": 36263, "original_price_clp": 55790, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}]};</script>
 <!-- INLINE_DATA_END -->
+
+<!-- ── Script ───────────────────────────────────────────────────── -->
 <script>
-  const DATA_FILE = "data/metformina_850mg.json";  // fallback when served via HTTP
+  /* ── Suggestions ── */
+  const SUGGESTIONS = [
+    'Metformina 850mg', 'Metformina 500mg',
+    'Losartan 50mg', 'Losartan 100mg',
+    'Atorvastatina 20mg', 'Atorvastatina 40mg',
+    'Omeprazol 20mg', 'Omeprazol 40mg',
+    'Ibuprofeno 400mg', 'Ibuprofeno 600mg',
+    'Paracetamol 500mg', 'Paracetamol 1g',
+    'Amoxicilina 500mg', 'Amoxicilina 875mg',
+  ];
+
+  /* ── Lab lookup (enrich mock data) ── */
+  const LAB_MAP = {
+    'Glimefor':    'Andrómaco',
+    'Glaupax':     'Saval',
+    'Glucophage':  'Merck',
+    'Glifortex':   'Recalcine',
+    'Glafornil':   'Sandoz',
+    'Glicenex':    'Chile',
+    'Hipoglucin':  'Biosano',
+    'Vildagliptina': 'Novartis',
+    'Metformina':  'Genérico',
+  };
+
+  function extractBrand(name) {
+    const words = name.trim().split(/\s+/);
+    const first = words[0];
+    if (/^\d/.test(first)) return 'Genérico';
+    return first;
+  }
+
+  function extractLab(name) {
+    const brand = extractBrand(name);
+    return LAB_MAP[brand] || LAB_MAP[name.split(/\s+/)[0]] || 'Genérico';
+  }
 
   function formatCLP(n) {
-    return "$" + n.toLocaleString("es-CL");
+    return '$' + n.toLocaleString('es-CL');
   }
 
   function formatDate(iso) {
-    return new Date(iso).toLocaleString("es-CL", {
-      day: "2-digit", month: "2-digit", year: "numeric",
-      hour: "2-digit", minute: "2-digit"
+    return new Date(iso).toLocaleString('es-CL', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
     });
   }
 
-  async function loadData() {
-    let payload;
-    // Use embedded data if available (no server needed), else fetch from disk
-    if (window.SCRAPED_DATA) {
-      payload = window.SCRAPED_DATA;
-    } else {
-      try {
-        const resp = await fetch(DATA_FILE);
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        payload = await resp.json();
-      } catch (e) {
-        return; // keep the empty state
-      }
-    }
+  /* ── State ── */
+  let allResults   = [];
+  let sortAsc      = true;
+  let filterLab    = '';
+  let filterFarm   = '';
 
-    document.getElementById("query-label").textContent = payload.query || "—";
-    document.getElementById("timestamp-label").textContent =
-      payload.generated_at ? "Actualizado: " + formatDate(payload.generated_at) : "";
+  /* ── Render table ── */
+  function renderTable() {
+    let rows = allResults
+      .filter(r => (!filterLab  || r._lab  === filterLab)
+                && (!filterFarm || r.pharmacy === filterFarm));
 
-    const results = payload.results || [];
-    if (!results.length) return;
+    rows.sort((a, b) => sortAsc
+      ? (a.price_clp || 0) - (b.price_clp || 0)
+      : (b.price_clp || 0) - (a.price_clp || 0));
 
-    // Stats
-    const prices = results.map(r => r.price_clp).filter(Boolean);
-    const minPrice = Math.min(...prices);
-    const maxPrice = Math.max(...prices);
-    document.getElementById("stat-count").textContent = results.length;
-    document.getElementById("stat-min").textContent = formatCLP(minPrice);
-    document.getElementById("stat-max").textContent = formatCLP(maxPrice);
-    document.getElementById("stat-diff").textContent = formatCLP(maxPrice - minPrice);
-    document.getElementById("stats-row").style.display = "flex";
+    document.getElementById('results-count').textContent =
+      rows.length + ' resultado' + (rows.length !== 1 ? 's' : '');
 
-    // Sort cheapest first
-    results.sort((a, b) => (a.price_clp || 0) - (b.price_clp || 0));
+    const minPrice = Math.min(...rows.map(r => r.price_clp).filter(Boolean));
 
-    const rows = results.map((r, i) => `
-      <tr>
-        <td>${r.drug_name}</td>
-        <td><span class="pharmacy-tag">${r.pharmacy}</span></td>
-        <td class="price">
-          ${r.price_clp ? formatCLP(r.price_clp) : "—"}
-          ${i === 0 ? '<span class="badge-best">Mejor precio</span>' : ""}
-        </td>
-      </tr>
-    `).join("");
+    const tbody = rows.map(r => {
+      const isBest = r.price_clp === minPrice;
+      const brand  = extractBrand(r.drug_name);
+      const lab    = r._lab;
+      return `
+        <tr>
+          <td>
+            <div class="drug-name">${r.drug_name}</div>
+          </td>
+          <td><span class="brand-tag">${brand}</span></td>
+          <td class="col-lab"><span class="lab-tag">${lab}</span></td>
+          <td><span class="pharmacy-tag"><span class="pharmacy-dot"></span>${r.pharmacy}</span></td>
+          <td>
+            <div class="price-cell">
+              <span class="price-amount">${r.price_clp ? formatCLP(r.price_clp) : '—'}</span>
+              ${r.original_price_clp && r.original_price_clp > r.price_clp
+                ? `<span class="price-original">${formatCLP(r.original_price_clp)}</span>` : ''}
+              ${isBest ? '<span class="badge-best">Mejor precio</span>' : ''}
+            </div>
+          </td>
+          <td>
+            <a class="btn-buy" href="${r.url}" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+              </svg>
+              Comprar
+            </a>
+          </td>
+        </tr>`;
+    }).join('');
 
-    document.getElementById("content").innerHTML = `
-      <table>
-        <thead>
-          <tr>
-            <th>Medicamento</th>
-            <th>Farmacia</th>
-            <th>Precio (CLP)</th>
-          </tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>
-    `;
+    document.getElementById('content').innerHTML = `
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Medicamento</th>
+              <th>Marca</th>
+              <th class="col-lab">Laboratorio</th>
+              <th>Farmacia</th>
+              <th>Precio (CLP)</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>${tbody}</tbody>
+        </table>
+      </div>`;
   }
 
-  loadData();
+  /* ── Populate filters ── */
+  function populateFilters(results) {
+    const labs  = [...new Set(results.map(r => r._lab))].sort();
+    const farms = [...new Set(results.map(r => r.pharmacy))].sort();
+
+    const labSel  = document.getElementById('filter-lab');
+    const farmSel = document.getElementById('filter-farm');
+
+    labs.forEach(l => {
+      const o = document.createElement('option');
+      o.value = l; o.textContent = l;
+      labSel.appendChild(o);
+    });
+    farms.forEach(f => {
+      const o = document.createElement('option');
+      o.value = f; o.textContent = f;
+      farmSel.appendChild(o);
+    });
+
+    labSel.addEventListener('change', e => { filterLab = e.target.value; renderTable(); });
+    farmSel.addEventListener('change', e => { filterFarm = e.target.value; renderTable(); });
+  }
+
+  /* ── Load data ── */
+  async function loadData(payload) {
+    if (!payload) return;
+
+    document.getElementById('query-label').textContent = payload.query || '—';
+    document.getElementById('timestamp-label').textContent =
+      payload.generated_at ? 'Actualizado: ' + formatDate(payload.generated_at) : '';
+
+    const results = (payload.results || []).map(r => ({
+      ...r,
+      _lab: extractLab(r.drug_name),
+    }));
+
+    if (!results.length) return;
+
+    allResults = results;
+
+    // Stats
+    const prices  = results.map(r => r.price_clp).filter(Boolean);
+    const minP    = Math.min(...prices);
+    const maxP    = Math.max(...prices);
+    document.getElementById('stat-count').textContent = results.length;
+    document.getElementById('stat-min').textContent   = formatCLP(minP);
+    document.getElementById('stat-max').textContent   = formatCLP(maxP);
+    document.getElementById('stat-diff').textContent  = formatCLP(maxP - minP);
+
+    document.getElementById('meta-bar').style.display    = '';
+    document.getElementById('stats-row').style.display   = '';
+    document.getElementById('filters-bar').style.display = '';
+
+    populateFilters(results);
+    renderTable();
+  }
+
+  /* ── Sort button ── */
+  document.getElementById('sort-btn').addEventListener('click', function () {
+    sortAsc = !sortAsc;
+    this.textContent = '';
+    this.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;transition:transform .2s;${sortAsc ? '' : 'transform:rotate(180deg)'}">
+        <path d="M3 6h18M7 12h10M11 18h2"/>
+      </svg>
+      Precio: ${sortAsc ? 'menor primero' : 'mayor primero'}`;
+    renderTable();
+  });
+
+  /* ── Autocomplete ── */
+  const searchInput = document.getElementById('search-input');
+  const dropdown    = document.getElementById('autocomplete-dropdown');
+  let activeIdx     = -1;
+
+  function showSuggestions(val) {
+    const q = val.toLowerCase().trim();
+    const matches = q
+      ? SUGGESTIONS.filter(s => s.toLowerCase().includes(q))
+      : SUGGESTIONS.slice(0, 8);
+
+    if (!matches.length) { dropdown.classList.remove('open'); return; }
+
+    dropdown.innerHTML = matches.map((s, i) => `
+      <div class="autocomplete-item" data-idx="${i}" data-val="${s}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        ${s}
+      </div>`).join('');
+
+    dropdown.querySelectorAll('.autocomplete-item').forEach(el => {
+      el.addEventListener('mousedown', e => {
+        e.preventDefault();
+        searchInput.value = el.dataset.val;
+        dropdown.classList.remove('open');
+        handleSearch(el.dataset.val);
+      });
+    });
+
+    activeIdx = -1;
+    dropdown.classList.add('open');
+  }
+
+  searchInput.addEventListener('input', e => showSuggestions(e.target.value));
+  searchInput.addEventListener('focus', e => showSuggestions(e.target.value));
+  searchInput.addEventListener('blur', () => setTimeout(() => dropdown.classList.remove('open'), 150));
+
+  searchInput.addEventListener('keydown', e => {
+    const items = dropdown.querySelectorAll('.autocomplete-item');
+    if (!items.length) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      activeIdx = (activeIdx + 1) % items.length;
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      activeIdx = (activeIdx - 1 + items.length) % items.length;
+    } else if (e.key === 'Enter') {
+      if (activeIdx >= 0) {
+        searchInput.value = items[activeIdx].dataset.val;
+        dropdown.classList.remove('open');
+        handleSearch(searchInput.value);
+      }
+      return;
+    } else if (e.key === 'Escape') {
+      dropdown.classList.remove('open');
+      return;
+    }
+    items.forEach((el, i) => el.classList.toggle('active', i === activeIdx));
+  });
+
+  function handleSearch(query) {
+    // If embedded data matches, show it; otherwise show empty state
+    if (window.SCRAPED_DATA &&
+        window.SCRAPED_DATA.query.toLowerCase().includes(query.toLowerCase().split(' ')[0].toLowerCase())) {
+      loadData(window.SCRAPED_DATA);
+    }
+  }
+
+  /* ── Init ── */
+  (async function init() {
+    let payload = window.SCRAPED_DATA || null;
+    if (!payload) {
+      try {
+        const r = await fetch('data/metformina_850mg.json');
+        if (r.ok) payload = await r.json();
+      } catch (_) {}
+    }
+    if (payload) {
+      searchInput.value = payload.query || '';
+      loadData(payload);
+    }
+  })();
 </script>
 
 </body>
