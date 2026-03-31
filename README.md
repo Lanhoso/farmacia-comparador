@@ -110,6 +110,7 @@ Each JSON file in `data/` follows this schema:
       "price_clp": 2712,
       "original_price_clp": 3390,
       "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg",
+      "product_url": "https://www.cruzverde.cl/metformina-850-mg-30-comprimidos/270505.html",
       "scraped_at": "2026-03-30T19:08:00+00:00"
     }
   ]

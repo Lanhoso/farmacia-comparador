@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>farmaciasbaratas.cl — Compara precios de medicamentos en Chile</title>
+  <title>farmaciabarata.cl — Compara precios de medicamentos en Chile</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -347,16 +347,6 @@
       margin-top: .1rem;
     }
 
-    .brand-tag {
-      display: inline-block;
-      background: var(--gray-100);
-      color: var(--gray-600);
-      font-size: .75rem;
-      font-weight: 500;
-      padding: .2rem .6rem;
-      border-radius: 6px;
-    }
-
     .lab-tag {
       font-size: .82rem;
       color: var(--gray-500);
@@ -541,7 +531,7 @@
       <div class="logo-icon">
         <svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-7 3a1 1 0 011 1v3h3a1 1 0 010 2h-3v3a1 1 0 01-2 0v-3H8a1 1 0 010-2h3V7a1 1 0 011-1z"/></svg>
       </div>
-      <span class="logo-text">farmacias<span>baratas</span>.cl</span>
+      <span class="logo-text">farmacia<span>barata</span>.cl</span>
     </a>
     <span class="badge-beta">Beta</span>
   </div>
@@ -726,14 +716,12 @@
 
     const tbody = rows.map(r => {
       const isBest = r.price_clp === minPrice;
-      const brand  = extractBrand(r.drug_name);
       const lab    = r._lab;
       return `
         <tr>
           <td>
             <div class="drug-name">${r.drug_name}</div>
           </td>
-          <td><span class="brand-tag">${brand}</span></td>
           <td class="col-lab"><span class="lab-tag">${lab}</span></td>
           <td><span class="pharmacy-tag"><span class="pharmacy-dot"></span>${r.pharmacy}</span></td>
           <td>
@@ -745,7 +733,7 @@
             </div>
           </td>
           <td>
-            <a class="btn-buy" href="${r.url}" target="_blank" rel="noopener">
+            <a class="btn-buy" href="${r.product_url || r.url}" target="_blank" rel="noopener">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
               </svg>
@@ -761,7 +749,6 @@
           <thead>
             <tr>
               <th>Medicamento</th>
-              <th>Marca</th>
               <th class="col-lab">Laboratorio</th>
               <th>Farmacia</th>
               <th>Precio (CLP)</th>

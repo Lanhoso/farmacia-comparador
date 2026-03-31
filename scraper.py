@@ -97,12 +97,19 @@ async def scrape_cruzverde(page, drug_query: str) -> List[dict]:
 
             orig_price = _parse_price(orig_raw)
 
+            # Capture the exact product URL from the card's anchor element
+            product_url = await container.evaluate(
+                "el => { const a = el.querySelector('a[href]'); "
+                "return a ? a.href : null; }"
+            )
+
             results.append({
                 "pharmacy": "Cruz Verde",
                 "drug_name": name,
                 "price_clp": price,
                 "original_price_clp": orig_price,
                 "url": url,
+                "product_url": product_url or url,
                 "scraped_at": scraped_at,
             })
         except Exception as exc:
