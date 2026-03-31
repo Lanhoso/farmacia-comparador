@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
   <style>
     /* ── Variables ─────────────────────────────────────────────── */
     :root {
@@ -80,27 +81,14 @@
     .logo {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
       text-decoration: none;
-    }
-    .logo-icon {
-      width: 32px;
-      height: 32px;
-      background: linear-gradient(135deg, var(--blue-500), var(--teal-500));
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       flex-shrink: 0;
     }
-    .logo-icon svg { width: 18px; height: 18px; fill: white; }
-    .logo-text {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--gray-900);
-      letter-spacing: -0.02em;
+    .logo img {
+      height: 36px;
+      width: auto;
+      display: block;
     }
-    .logo-text span { color: var(--blue-500); }
     .badge-beta {
       font-size: 0.65rem;
       font-weight: 600;
@@ -518,7 +506,7 @@
     @media (max-width: 480px) {
       .stats-row { grid-template-columns: 1fr 1fr; }
       .stat-card .s-value { font-size: 1.15rem; }
-      .logo-text { font-size: .95rem; }
+      .logo img { height: 28px; }
     }
   </style>
 </head>
@@ -528,10 +516,7 @@
 <header>
   <div class="header-inner">
     <a href="/" class="logo">
-      <div class="logo-icon">
-        <svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-7 3a1 1 0 011 1v3h3a1 1 0 010 2h-3v3a1 1 0 01-2 0v-3H8a1 1 0 010-2h3V7a1 1 0 011-1z"/></svg>
-      </div>
-      <span class="logo-text">farmacia<span>barata</span>.cl</span>
+      <img src="logocomnome.svg" alt="farmaciabarata.cl" />
     </a>
     <span class="badge-beta">Beta</span>
   </div>
