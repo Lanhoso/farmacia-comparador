@@ -753,6 +753,10 @@
     const labSel  = document.getElementById('filter-lab');
     const farmSel = document.getElementById('filter-farm');
 
+    // Reset dropdowns before populating (supports multiple searches)
+    labSel.innerHTML  = '<option value="">Todos</option>';
+    farmSel.innerHTML = '<option value="">Todas</option>';
+
     labs.forEach(l => {
       const o = document.createElement('option');
       o.value = l; o.textContent = l;
@@ -764,8 +768,49 @@
       farmSel.appendChild(o);
     });
 
-    labSel.addEventListener('change', e => { filterLab = e.target.value; renderTable(); });
-    farmSel.addEventListener('change', e => { filterFarm = e.target.value; renderTable(); });
+    labSel.onchange  = e => { filterLab  = e.target.value; renderTable(); };
+    farmSel.onchange = e => { filterFarm = e.target.value; renderTable(); };
+  }
+
+  /* ── Reset UI to empty state ── */
+  function resetUI() {
+    filterLab  = '';
+    filterFarm = '';
+    sortAsc    = true;
+    allResults = [];
+    document.getElementById('meta-bar').style.display    = 'none';
+    document.getElementById('stats-row').style.display   = 'none';
+    document.getElementById('filters-bar').style.display = 'none';
+    document.getElementById('content').innerHTML = '';
+  }
+
+  /* ── Show loading state ── */
+  function showLoading(query) {
+    document.getElementById('content').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+          </svg>
+        </div>
+        <h3>Buscando "${query}"…</h3>
+        <p>Cargando precios disponibles</p>
+      </div>`;
+  }
+
+  /* ── Show not found state ── */
+  function showNotFound(query) {
+    document.getElementById('content').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+        </div>
+        <h3>Sin resultados para "${query}"</h3>
+        <p>No hay datos scraped para este medicamento todavía.</p>
+        <code>python scraper.py "${query}"</code>
+      </div>`;
   }
 
   /* ── Load data ── */
@@ -781,7 +826,10 @@
       _lab: extractLab(r.drug_name),
     }));
 
-    if (!results.length) return;
+    if (!results.length) {
+      showNotFound(payload.query || '');
+      return;
+    }
 
     allResults = results;
 
@@ -853,6 +901,10 @@
   searchInput.addEventListener('blur', () => setTimeout(() => dropdown.classList.remove('open'), 150));
 
   searchInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !dropdown.classList.contains('open')) {
+      handleSearch(searchInput.value);
+      return;
+    }
     const items = dropdown.querySelectorAll('.autocomplete-item');
     if (!items.length) return;
     if (e.key === 'ArrowDown') {
@@ -864,9 +916,9 @@
     } else if (e.key === 'Enter') {
       if (activeIdx >= 0) {
         searchInput.value = items[activeIdx].dataset.val;
-        dropdown.classList.remove('open');
-        handleSearch(searchInput.value);
       }
+      dropdown.classList.remove('open');
+      handleSearch(searchInput.value);
       return;
     } else if (e.key === 'Escape') {
       dropdown.classList.remove('open');
@@ -875,27 +927,45 @@
     items.forEach((el, i) => el.classList.toggle('active', i === activeIdx));
   });
 
-  function handleSearch(query) {
-    // If embedded data matches, show it; otherwise show empty state
-    if (window.SCRAPED_DATA &&
-        window.SCRAPED_DATA.query.toLowerCase().includes(query.toLowerCase().split(' ')[0].toLowerCase())) {
-      loadData(window.SCRAPED_DATA);
-    }
+  /* ── Generate slug matching scraper.py logic ── */
+  function toSlug(query) {
+    return query.toLowerCase().replace(/[^\w]/g, '_');
   }
 
-  /* ── Init ── */
-  (async function init() {
-    let payload = window.SCRAPED_DATA || null;
-    if (!payload) {
-      try {
-        const r = await fetch('data/metformina_850mg.json');
-        if (r.ok) payload = await r.json();
-      } catch (_) {}
+  async function handleSearch(query) {
+    const q = query.trim();
+    if (!q) return;
+    dropdown.classList.remove('open');
+    resetUI();
+    showLoading(q);
+
+    // 1. Try fetching the JSON file for this specific query
+    const slug = toSlug(q);
+    try {
+      const r = await fetch(`data/${slug}.json`);
+      if (r.ok) {
+        const payload = await r.json();
+        await loadData(payload);
+        return;
+      }
+    } catch (_) {}
+
+    // 2. Fallback: check if embedded data matches the query
+    if (window.SCRAPED_DATA) {
+      const embedded = window.SCRAPED_DATA.query || '';
+      if (embedded.toLowerCase().includes(q.toLowerCase().split(' ')[0].toLowerCase())) {
+        await loadData(window.SCRAPED_DATA);
+        return;
+      }
     }
-    if (payload) {
-      searchInput.value = payload.query || '';
-      loadData(payload);
-    }
+
+    // 3. No data found
+    showNotFound(q);
+  }
+
+  /* ── Init — start empty, wait for user search ── */
+  (function init() {
+    // Page starts clean — results only appear after a search
   })();
 </script>
 
