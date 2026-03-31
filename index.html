@@ -605,58 +605,6 @@
 
 </main>
 
-<!-- ── Typeform Popover ─────────────────────────────────────────── -->
-<button type="button" id="tf-btn" class="tf-popover-btn" aria-label="Sugerencias">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-  </svg>
-  <span>Sugerencias</span>
-</button>
-<script src="//embed.typeform.com/next/embed.js"></script>
-<script>
-  document.getElementById('tf-btn').addEventListener('click', function () {
-    window.tf.createPopup('01KN2NGAS9T3K62G1SYGMA81B8', {
-      size: 70,
-      hideHeaders: true,
-      hideFooter: true,
-    }).open();
-  });
-</script>
-
-<style>
-  .tf-popover-btn {
-    position: fixed;
-    bottom: 1.5rem;
-    right: 1.5rem;
-    z-index: 999;
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-    padding: .7rem 1.1rem;
-    background: linear-gradient(135deg, var(--blue-500), var(--teal-500));
-    color: #fff;
-    font-family: 'Inter', sans-serif;
-    font-size: .85rem;
-    font-weight: 600;
-    border: none;
-    border-radius: 999px;
-    cursor: pointer;
-    box-shadow: 0 4px 14px rgba(14,165,233,.4);
-    transition: transform .15s, box-shadow .15s;
-  }
-  .tf-popover-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(14,165,233,.45);
-  }
-  .tf-popover-btn:active { transform: translateY(0); }
-  .tf-popover-btn svg { width: 17px; height: 17px; flex-shrink: 0; }
-
-  @media (max-width: 480px) {
-    .tf-popover-btn span { display: none; }
-    .tf-popover-btn { padding: .8rem; }
-  }
-</style>
-
 <!-- ── Footer ──────────────────────────────────────────────────── -->
 <footer>
   Basado en datos públicos &nbsp;·&nbsp;
