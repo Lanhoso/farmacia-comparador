@@ -445,16 +445,6 @@
       margin-bottom: .4rem;
     }
     .empty-state p { font-size: .88rem; color: var(--gray-400); }
-    .empty-state code {
-      display: inline-block;
-      margin-top: .75rem;
-      background: var(--gray-100);
-      color: var(--gray-600);
-      padding: .35rem .75rem;
-      border-radius: var(--radius-sm);
-      font-size: .82rem;
-      font-family: 'SFMono-Regular', Consolas, monospace;
-    }
 
     /* ── Footer ────────────────────────────────────────────────── */
     footer {
@@ -609,8 +599,7 @@
         </svg>
       </div>
       <h3>Busca un medicamento</h3>
-      <p>Escribe en el buscador o ejecuta el scraper para cargar datos.</p>
-      <code>python scraper.py "Metformina 850mg"</code>
+      <p>Escribe el nombre del medicamento en el buscador de arriba.</p>
     </div>
   </div>
 
@@ -808,8 +797,7 @@
           </svg>
         </div>
         <h3>Sin resultados para "${query}"</h3>
-        <p>No hay datos scraped para este medicamento todavía.</p>
-        <code>python scraper.py "${query}"</code>
+        <p>Aún no tenemos precios para este medicamento. Intenta con otro nombre o dosificación.</p>
       </div>`;
   }
 
