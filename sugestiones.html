@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sugerencias — farmaciabarata.cl</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+  <style>
+    :root {
+      --blue-50:  #f0f9ff;
+      --blue-100: #e0f2fe;
+      --blue-500: #0ea5e9;
+      --blue-600: #0284c7;
+      --teal-500: #14b8a6;
+      --gray-50:  #f8fafc;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-400: #94a3b8;
+      --gray-500: #64748b;
+      --gray-700: #334155;
+      --gray-900: #0f172a;
+      --white:    #ffffff;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,.05);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--gray-50);
+      color: var(--gray-700);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Header ── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--gray-200);
+      box-shadow: var(--shadow-sm);
+    }
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+    .logo img {
+      height: 48px;
+      width: auto;
+      display: block;
+    }
+    .badge-beta {
+      font-size: .65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      background: var(--blue-100);
+      color: var(--blue-600);
+      padding: .2rem .55rem;
+      border-radius: 999px;
+    }
+
+    /* ── Main ── */
+    main {
+      flex: 1;
+      max-width: 900px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+
+    .page-title {
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-weight: 700;
+      color: var(--gray-900);
+      letter-spacing: -.03em;
+      margin-bottom: .5rem;
+    }
+    .page-subtitle {
+      font-size: .95rem;
+      color: var(--gray-500);
+      margin-bottom: 2rem;
+    }
+
+    .form-wrap {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,.08);
+    }
+    .form-wrap [data-tf-live] {
+      width: 100%;
+      min-height: 600px;
+    }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--gray-200);
+      padding: 1.75rem 1.5rem;
+      text-align: center;
+      font-size: .78rem;
+      color: var(--gray-400);
+    }
+
+    @media (max-width: 480px) {
+      .logo img { height: 38px; }
+      main { padding: 1.5rem 1rem 3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="/" class="logo">
+      <img src="logocomnome.svg" alt="farmaciabarata.cl" />
+    </a>
+    <span class="badge-beta">Beta</span>
+  </div>
+</header>
+
+<main>
+  <h1 class="page-title">Sugerencias</h1>
+  <p class="page-subtitle">¿Qué medicamentos te gustaría ver? ¿Tienes alguna idea para mejorar el sitio? Cuéntanos.</p>
+
+  <div class="form-wrap">
+    <div data-tf-live="01KN2NGAS9T3K62G1SYGMA81B8"></div>
+    <script src="//embed.typeform.com/next/embed.js"></script>
+  </div>
+</main>
+
+<footer>
+  Datos obtenidos mediante scraping público &nbsp;·&nbsp;
+  Actualizado periódicamente &nbsp;·&nbsp;
+  No afiliado a ninguna farmacia
+</footer>
+
+</body>
+</html>
