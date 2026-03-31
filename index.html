@@ -606,18 +606,22 @@
 </main>
 
 <!-- ── Typeform Popover ─────────────────────────────────────────── -->
-<button data-tf-popup="01KN2NGAS9T3K62G1SYGMA81B8"
-        data-tf-size="60"
-        data-tf-hide-headers
-        data-tf-hide-footer
-        class="tf-popover-btn"
-        aria-label="Sugerencias">
+<button type="button" id="tf-btn" class="tf-popover-btn" aria-label="Sugerencias">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
   </svg>
   <span>Sugerencias</span>
 </button>
 <script src="//embed.typeform.com/next/embed.js"></script>
+<script>
+  document.getElementById('tf-btn').addEventListener('click', function () {
+    window.tf.createPopup('01KN2NGAS9T3K62G1SYGMA81B8', {
+      size: 70,
+      hideHeaders: true,
+      hideFooter: true,
+    }).open();
+  });
+</script>
 
 <style>
   .tf-popover-btn {
