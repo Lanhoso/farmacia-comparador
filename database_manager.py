@@ -129,9 +129,7 @@ def get_r2_client():
     """
     Retorna cliente boto3 configurado para o endpoint R2 da Cloudflare.
 
-    Endpoint: https://<R2_ACCOUNT_ID>.r2.cloudflarestorage.com
-
-    Lê R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY do ambiente.
+    Lê R2_ENDPOINT_URL, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY do ambiente.
 
     Returns:
         boto3.client (S3-compatible)
@@ -147,11 +145,9 @@ def get_r2_client():
             "Pacote 'boto3' não encontrado. Execute: pip install boto3"
         ) from e
 
-    account_id        = _require_env("R2_ACCOUNT_ID")
+    endpoint_url      = _require_env("R2_ENDPOINT_URL")
     access_key_id     = _require_env("R2_ACCESS_KEY_ID")
     secret_access_key = _require_env("R2_SECRET_ACCESS_KEY")
-
-    endpoint_url = f"https://{account_id}.r2.cloudflarestorage.com"
 
     client = boto3.client(
         "s3",
