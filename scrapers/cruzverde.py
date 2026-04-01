@@ -418,6 +418,21 @@ class CruzVerdeScraper(BaseScraper):
 
                 record = self._build_record(card, detail, scraped_at)
                 self._apply_inferred(record)
+
+                # ── Diagnóstico: campos críticos ainda ausentes após enriquecimento ──
+                missing = []
+                if not record.get("laboratorio"):
+                    missing.append("laboratorio")
+                if not record.get("url_image"):
+                    missing.append("url_image")
+                if missing:
+                    self.logger.warning(
+                        "SKU %s — campos ausentes após enriquecimento: %s | URL: %s",
+                        record.get("sku") or "N/A",
+                        ", ".join(missing),
+                        product_url,
+                    )
+
                 results.append(record)
 
                 if (i + 1) % 10 == 0:

@@ -274,10 +274,28 @@ def infer_from_nombre(nombre_producto: str) -> dict:
             r"(?:/(?:ml|g|kg|comp(?:rimido)?|tab(?:leta)?|amp(?:olla)?|dosi?s?))?)"
         )
 
-        # ── dosis (primeira ocorrência) ────────────────────────────────────────
-        dosis_match = _re.search(_DOSIS_PAT, nombre, _re.IGNORECASE)
-        if dosis_match:
-            result["dosis"] = dosis_match.group(1).strip()
+        # ── Limite de apresentação ─────────────────────────────────────────────
+        # Primeira palavra de forma farmacêutica ("Comprimidos", "Solución"…)
+        # Doses após esse ponto são volumes/tamanhos de embalagem, não doses de PA.
+        _PRES_WORDS = (
+            r"comprimidos?|c[aá]psulas?|capsulas?|tabletas?|grageas?|"
+            r"sobres?|ampollas?|viales?|frascos?|jarabe|soluci[oó]n|"
+            r"suspensi[oó]n|crema|gel|ung[üu]ento|pomada|parche|"
+            r"gotas?|spray|aerosol|inhalador|supositorios?|[oó]vulos?"
+        )
+        pres_boundary_m = _re.search(
+            rf"\b(?:{_PRES_WORDS})\b", nombre, _re.IGNORECASE
+        )
+        boundary = pres_boundary_m.start() if pres_boundary_m else len(nombre)
+
+        all_dose_matches = list(_re.finditer(_DOSIS_PAT, nombre, _re.IGNORECASE))
+        # Doses do princípio ativo: apenas as que aparecem antes da apresentação
+        active_doses = [m for m in all_dose_matches if m.start() < boundary]
+
+        # ── dosis ──────────────────────────────────────────────────────────────
+        # Produto simples → dose única; combinado → todas as doses unidas por " & "
+        if active_doses:
+            result["dosis"] = " & ".join(m.group(1).strip() for m in active_doses)
 
         # ── cantidad + presentacion ────────────────────────────────────────────
         _PRES = (
@@ -300,30 +318,13 @@ def infer_from_nombre(nombre_producto: str) -> dict:
 
         # ── principio_activo (suporte a múltiplos componentes) ────────────────
         #
-        # Estratégia:
-        #   1. Encontrar a posição da primeira palavra de apresentação farmacêutica
-        #      ("Comprimidos", "Cápsulas", "Solución"…) como limite — doses após
-        #      esse limite são volumes/tamanhos de embalagem, não doses de princípio ativo.
-        #   2. Filtrar matches de dose que ocorrem antes desse limite.
-        #   3. Para cada dose filtrada:
-        #      - Dose 0  → segmento = nombre[:dose.start()]
-        #                   extrair ÚLTIMA palavra não-dígito (ignora nome comercial)
-        #      - Dose N  → segmento = texto entre dose[N-1].end() e dose[N].start()
-        #                   extrair TODAS as palavras (o segmento inteiro é o princípio ativo)
-        #   4. Em cada segmento: remover palavras de sal/forma do final (ex: "Clorhidrato").
-        #   5. Juntar com " & ".
-
-        pres_boundary_m = _re.search(
-            r"\b(?:comprimidos?|c[aá]psulas?|capsulas?|tabletas?|grageas?|"
-            r"sobres?|ampollas?|viales?|frascos?|jarabe|soluci[oó]n|"
-            r"suspensi[oó]n|crema|gel|ung[üu]ento|pomada|parche|"
-            r"gotas?|spray|aerosol|inhalador|supositorios?|[oó]vulos?)\b",
-            nombre, _re.IGNORECASE,
-        )
-        boundary = pres_boundary_m.start() if pres_boundary_m else len(nombre)
-
-        all_dose_matches = list(_re.finditer(_DOSIS_PAT, nombre, _re.IGNORECASE))
-        active_doses = [m for m in all_dose_matches if m.start() < boundary]
+        # Para cada dose em active_doses:
+        #   - Dose 0  → segmento = nombre[:dose.start()]
+        #               extrair ÚLTIMA palavra não-dígito (ignora nome comercial)
+        #   - Dose N  → segmento = texto entre dose[N-1].end() e dose[N].start()
+        #               extrair TODAS as palavras (segmento inteiro é o PA)
+        # Em cada segmento: remover sufixos de sal do final ("Clorhidrato", etc.)
+        # Juntar com " & ".
 
         def _clean_words(segment: str) -> list:
             """Divide segmento em palavras; remove tokens puramente numéricos."""
@@ -474,16 +475,16 @@ if __name__ == "__main__":
             {"principio_activo": "Metformina", "dosis": "850 mg",
              "cantidad": 30, "presentacion": "Comprimidos"},
         ),
-        # Dois princípios ativos, sal ignorado ("Clorhidrato")
+        # Dois princípios ativos, sal ignorado ("Clorhidrato") — dosis combinada
         (
             "Vildagliptina 50 mg Metformina Clorhidrato 850 mg 60 Comprimidos",
-            {"principio_activo": "Vildagliptina & Metformina", "dosis": "50 mg",
+            {"principio_activo": "Vildagliptina & Metformina", "dosis": "50 mg & 850 mg",
              "cantidad": 60, "presentacion": "Comprimidos"},
         ),
-        # Dois princípios ativos, segundo é multi-palavra ("Ácido Clavulánico")
+        # Dois princípios ativos, segundo é multi-palavra — dosis combinada
         (
             "Amoxicilina 500 mg Ácido Clavulánico 125 mg 30 Comprimidos",
-            {"principio_activo": "Amoxicilina & Ácido Clavulánico", "dosis": "500 mg",
+            {"principio_activo": "Amoxicilina & Ácido Clavulánico", "dosis": "500 mg & 125 mg",
              "cantidad": 30, "presentacion": "Comprimidos"},
         ),
         # Apresentação com qualificador
