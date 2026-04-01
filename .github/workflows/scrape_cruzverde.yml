@@ -1,4 +1,4 @@
-name: Scrape Pharmacy Prices
+name: Scrape - Cruz Verde
 
 on:
   # schedule:
@@ -32,6 +32,7 @@ jobs:
       - name: Run scraper
         run: python main.py
         env:
+          FARMACIA: cruz_verde
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           R2_ENDPOINT_URL: ${{ secrets.R2_ENDPOINT_URL }}
@@ -41,4 +42,4 @@ jobs:
 
       - name: Summary
         if: always()
-        run: echo "Scraping concluído em $(date -u '+%Y-%m-%d %H:%M UTC')"
+        run: echo "Scraping Cruz Verde concluído em $(date -u '+%Y-%m-%d %H:%M UTC')"

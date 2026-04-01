@@ -10,15 +10,17 @@ Fluxo de execução:
     6. Imprime resumo final
 
 Uso:
-    python main.py                          # Usa queries padrão
+    python main.py                          # Usa queries padrão, todos os scrapers
     python main.py "Losartan 50mg"          # Busca query específica
     python main.py "Metformina 850mg" "Ibuprofeno 400mg"
+    FARMACIA=cruz_verde python main.py      # Apenas Cruz Verde (usado pelo GitHub Actions)
 """
 
 from __future__ import annotations
 
 import asyncio
 import logging
+import os
 import sys
 from dataclasses import asdict
 from datetime import datetime, timezone
@@ -36,11 +38,46 @@ DEFAULT_QUERIES = [
     "Metformina 850mg",
 ]
 
-# ── Scrapers ativos (adicionar novos aqui quando implementados) ───────────────
+# ── Scrapers ativos ───────────────────────────────────────────────────────────
+
+# Mapa farmacia_id → factory function (lazy import dentro de get_active_scrapers)
+_SCRAPER_MAP: dict[str, str] = {
+    "cruz_verde": "CruzVerdeScraper",
+    "salcobrand": "SalcobrandScraper",
+    "ahumada":    "AhumadaScraper",
+}
+
 
 def get_active_scrapers():
-    """Retorna instâncias dos scrapers a executar."""
+    """Retorna instâncias dos scrapers a executar.
+
+    Se a variável de ambiente FARMACIA estiver definida, retorna apenas o
+    scraper correspondente — comportamento usado pelo GitHub Actions.
+    Se FARMACIA estiver ausente, retorna todos os scrapers (execução local).
+
+    Raises:
+        ValueError: se FARMACIA contiver um valor não reconhecido.
+    """
     from scrapers import CruzVerdeScraper, SalcobrandScraper, AhumadaScraper
+
+    _factories = {
+        "cruz_verde": CruzVerdeScraper,
+        "salcobrand": SalcobrandScraper,
+        "ahumada":    AhumadaScraper,
+    }
+
+    farmacia = os.environ.get("FARMACIA", "").strip().lower()
+
+    if farmacia:
+        if farmacia not in _factories:
+            raise ValueError(
+                f"FARMACIA='{farmacia}' inválida. "
+                f"Valores aceitos: {list(_factories)}"
+            )
+        logger.info("Modo farmácia única: %s", farmacia)
+        return [_factories[farmacia]()]
+
+    logger.info("Modo completo: executando todos os scrapers")
     return [
         CruzVerdeScraper(),
         SalcobrandScraper(),   # Retorna [] até ser implementado
