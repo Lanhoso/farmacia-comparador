@@ -220,19 +220,25 @@ def infer_from_nombre(nombre_producto: str) -> dict:
     Útil como fallback quando os scrapers não conseguem extrair esses
     campos das páginas individuais (SPAs com dados não acessíveis via CSS).
 
+    Suporta múltiplos princípios ativos (medicamentos combinados), separados
+    por " & " no campo principio_activo.
+
     Padrões reconhecidos (exemplos):
         "Metformina 850 mg 30 Comprimidos"
-            → principio_activo="Metformina", dosis="850 mg", cantidad=30,
-              presentacion="Comprimidos"
-        "Glafornil Metformina 850 mg 60 Comprimidos Recubiertos"
-            → principio_activo="Metformina" (última palavra antes do número),
-              dosis="850 mg", cantidad=60, presentacion="Comprimidos Recubiertos"
-        "Amoxicilina 500 mg 21 Cápsulas"
-            → principio_activo="Amoxicilina", dosis="500 mg", cantidad=21,
-              presentacion="Cápsulas"
+            → principio_activo="Metformina", dosis="850 mg",
+              cantidad=30, presentacion="Comprimidos"
+        "Glaupax 850 Metformina 850 mg 30 Comprimidos"
+            → principio_activo="Metformina" (nome comercial ignorado),
+              dosis="850 mg", cantidad=30, presentacion="Comprimidos"
+        "Vildagliptina 50 mg Metformina Clorhidrato 850 mg 60 Comprimidos"
+            → principio_activo="Vildagliptina & Metformina" (sal ignorado),
+              dosis="50 mg", cantidad=60, presentacion="Comprimidos"
+        "Amoxicilina 500 mg Ácido Clavulánico 125 mg 30 Comprimidos"
+            → principio_activo="Amoxicilina & Ácido Clavulánico",
+              dosis="500 mg", cantidad=30, presentacion="Comprimidos"
         "Ibuprofeno 5mg/ml Solución 100 ml"
-            → principio_activo="Ibuprofeno", dosis="5mg/ml", cantidad=100,
-              presentacion="Solución"
+            → principio_activo="Ibuprofeno", dosis="5mg/ml"
+              (100 ml é volume — ignorado como dose)
 
     Returns:
         dict com chaves: principio_activo, dosis, cantidad, presentacion.
@@ -240,6 +246,14 @@ def infer_from_nombre(nombre_producto: str) -> dict:
         Nunca lança exceção.
     """
     import re as _re
+
+    # Sufixos de sais/formas farmacêuticas que modificam o princípio ativo
+    # mas não fazem parte do nome canônico — ignorados na extração
+    _SALTS = frozenset({
+        "clorhidrato", "hidrocloruro",
+        "sódico", "sodico", "potásico", "potasico", "cálcico", "calcico",
+        "fosfato", "sulfato", "acetato", "maleato", "tartrato", "citrato", "bromuro",
+    })
 
     result: dict = {
         "principio_activo": None,
@@ -254,20 +268,18 @@ def infer_from_nombre(nombre_producto: str) -> dict:
     try:
         nombre = str(nombre_producto).strip()
 
-        # ── dosis ─────────────────────────────────────────────────────────────
-        # Captura: número + unidade (mg, mcg, g, ml, UI, %) com opcional /via
-        # Ex: "850 mg", "5mg/ml", "500mg", "10 mcg/dosis", "0,5 mg"
-        dosis_match = _re.search(
+        # Padrão de dose reutilizado em dosis e principio_activo
+        _DOSIS_PAT = (
             r"\b(\d+(?:[.,]\d+)?\s*(?:mg|mcg|µg|g(?!\w)|ml|UI|ui|%)"
-            r"(?:/(?:ml|g|kg|comp(?:rimido)?|tab(?:leta)?|amp(?:olla)?|dosi?s?))?)",
-            nombre, _re.IGNORECASE,
+            r"(?:/(?:ml|g|kg|comp(?:rimido)?|tab(?:leta)?|amp(?:olla)?|dosi?s?))?)"
         )
+
+        # ── dosis (primeira ocorrência) ────────────────────────────────────────
+        dosis_match = _re.search(_DOSIS_PAT, nombre, _re.IGNORECASE)
         if dosis_match:
             result["dosis"] = dosis_match.group(1).strip()
 
         # ── cantidad + presentacion ────────────────────────────────────────────
-        # Captura: número seguido de palavra de apresentação farmacêutica
-        # Incluir formas compostas ("Comprimidos Recubiertos") via grupo extra
         _PRES = (
             r"comprimidos?\s+recubiertos?|comprimidos?\s+masticables?|"
             r"comprimidos?\s+efervescentes?|comprimidos?\s+dispersables?|"
@@ -281,26 +293,73 @@ def infer_from_nombre(nombre_producto: str) -> dict:
             r"gotas?|spray|aerosol|inhalador|"
             r"supositorios?|[oó]vulos?"
         )
-        cant_match = _re.search(
-            rf"\b(\d+)\s+({_PRES})\b",
-            nombre, _re.IGNORECASE,
-        )
+        cant_match = _re.search(rf"\b(\d+)\s+({_PRES})\b", nombre, _re.IGNORECASE)
         if cant_match:
             result["cantidad"]     = int(cant_match.group(1))
             result["presentacion"] = cant_match.group(2).strip()
 
-        # ── principio_activo ──────────────────────────────────────────────────
-        # Estratégia: pegar tudo antes da primeira ocorrência de dígito,
-        # depois extrair a ÚLTIMA palavra (ignora nome comercial que precede).
-        # Ex: "Glafornil Metformina 850 mg..." → words=["Glafornil","Metformina"]
-        #     → última = "Metformina"
-        first_digit = _re.search(r"\b\d", nombre)
-        if first_digit:
-            before = nombre[: first_digit.start()].strip()
-            if before:
-                words = [w.strip("(),;") for w in before.split() if w.strip("(),;")]
-                if words:
-                    result["principio_activo"] = words[-1] or None
+        # ── principio_activo (suporte a múltiplos componentes) ────────────────
+        #
+        # Estratégia:
+        #   1. Encontrar a posição da primeira palavra de apresentação farmacêutica
+        #      ("Comprimidos", "Cápsulas", "Solución"…) como limite — doses após
+        #      esse limite são volumes/tamanhos de embalagem, não doses de princípio ativo.
+        #   2. Filtrar matches de dose que ocorrem antes desse limite.
+        #   3. Para cada dose filtrada:
+        #      - Dose 0  → segmento = nombre[:dose.start()]
+        #                   extrair ÚLTIMA palavra não-dígito (ignora nome comercial)
+        #      - Dose N  → segmento = texto entre dose[N-1].end() e dose[N].start()
+        #                   extrair TODAS as palavras (o segmento inteiro é o princípio ativo)
+        #   4. Em cada segmento: remover palavras de sal/forma do final (ex: "Clorhidrato").
+        #   5. Juntar com " & ".
+
+        pres_boundary_m = _re.search(
+            r"\b(?:comprimidos?|c[aá]psulas?|capsulas?|tabletas?|grageas?|"
+            r"sobres?|ampollas?|viales?|frascos?|jarabe|soluci[oó]n|"
+            r"suspensi[oó]n|crema|gel|ung[üu]ento|pomada|parche|"
+            r"gotas?|spray|aerosol|inhalador|supositorios?|[oó]vulos?)\b",
+            nombre, _re.IGNORECASE,
+        )
+        boundary = pres_boundary_m.start() if pres_boundary_m else len(nombre)
+
+        all_dose_matches = list(_re.finditer(_DOSIS_PAT, nombre, _re.IGNORECASE))
+        active_doses = [m for m in all_dose_matches if m.start() < boundary]
+
+        def _clean_words(segment: str) -> list:
+            """Divide segmento em palavras; remove tokens puramente numéricos."""
+            return [
+                w.strip("(),;.")
+                for w in segment.split()
+                if w.strip("(),;.") and not _re.match(r"^\d+$", w.strip("(),;."))
+            ]
+
+        def _strip_salts(words: list) -> list:
+            """Remove sufixos de sal/forma do final da lista de palavras."""
+            ws = list(words)
+            while ws and ws[-1].lower() in _SALTS:
+                ws.pop()
+            return ws
+
+        activos: list[str] = []
+        for idx, m in enumerate(active_doses):
+            if idx == 0:
+                segment = nombre[: m.start()]
+            else:
+                segment = nombre[active_doses[idx - 1].end() : m.start()]
+
+            words = _strip_salts(_clean_words(segment))
+            if not words:
+                continue
+
+            if idx == 0:
+                # Primeiro segmento pode ter nome comercial antes → só última palavra
+                activos.append(words[-1])
+            else:
+                # Segmentos intermediários são inteiramente o princípio ativo
+                activos.append(" ".join(words))
+
+        if activos:
+            result["principio_activo"] = " & ".join(activos)
 
     except Exception:
         pass  # Tolerante a qualquer falha
@@ -400,29 +459,46 @@ if __name__ == "__main__":
     except ValueError as e:
         print(f"    ValueError: {e}  ✓ OK")
 
-    # Teste 8: infer_from_nombre — casos comuns
+    # Teste 8: infer_from_nombre — casos variados (incluindo multi-princípio)
     print("\n[8] infer_from_nombre — casos variados:")
     cases = [
+        # Caso simples: um único princípio ativo
         (
             "Metformina 850 mg 30 Comprimidos",
             {"principio_activo": "Metformina", "dosis": "850 mg",
              "cantidad": 30, "presentacion": "Comprimidos"},
         ),
+        # Nome comercial antes do princípio ativo → só última palavra antes da dose
         (
-            "Glafornil Metformina 850 mg 60 Comprimidos Recubiertos",
+            "Glaupax 850 Metformina 850 mg 30 Comprimidos",
             {"principio_activo": "Metformina", "dosis": "850 mg",
-             "cantidad": 60, "presentacion": "Comprimidos Recubiertos"},
+             "cantidad": 30, "presentacion": "Comprimidos"},
         ),
+        # Dois princípios ativos, sal ignorado ("Clorhidrato")
+        (
+            "Vildagliptina 50 mg Metformina Clorhidrato 850 mg 60 Comprimidos",
+            {"principio_activo": "Vildagliptina & Metformina", "dosis": "50 mg",
+             "cantidad": 60, "presentacion": "Comprimidos"},
+        ),
+        # Dois princípios ativos, segundo é multi-palavra ("Ácido Clavulánico")
+        (
+            "Amoxicilina 500 mg Ácido Clavulánico 125 mg 30 Comprimidos",
+            {"principio_activo": "Amoxicilina & Ácido Clavulánico", "dosis": "500 mg",
+             "cantidad": 30, "presentacion": "Comprimidos"},
+        ),
+        # Apresentação com qualificador
         (
             "Amoxicilina 500 mg 21 Cápsulas",
             {"principio_activo": "Amoxicilina", "dosis": "500 mg",
              "cantidad": 21, "presentacion": "Cápsulas"},
         ),
+        # Dose /ml — "100 ml" depois de "Solución" é volume, não dose
         (
             "Ibuprofeno 5mg/ml Solución 100 ml",
             {"principio_activo": "Ibuprofeno", "dosis": "5mg/ml",
              "cantidad": None, "presentacion": None},
         ),
+        # Sem padrões reconhecíveis
         (
             "Producto sin datos",
             {"principio_activo": None, "dosis": None,
