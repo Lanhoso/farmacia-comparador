@@ -21,6 +21,9 @@ from scrapers.base_scraper import BaseScraper
 
 SEARCH_URL = "https://www.cruzverde.cl/search?query={query}"
 
+# Limite de segurança para evitar loops infinitos na paginação
+MAX_PRODUCTS = 200
+
 # CSS selectors verificados contra o site ao vivo (Angular + Tailwind)
 SELECTORS = {
     "product_name":   "h2.mt-4",
@@ -65,6 +68,14 @@ def _utcnow_iso() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
 
 
+def _parse_int(value: Optional[str]) -> Optional[int]:
+    """Extrai o primeiro inteiro de uma string. Ex: '30 comprimidos' → 30."""
+    if not value:
+        return None
+    match = re.search(r"\d+", str(value))
+    return int(match.group()) if match else None
+
+
 # ── Scraper ───────────────────────────────────────────────────────────────────
 
 class CruzVerdeScraper(BaseScraper):
@@ -75,12 +86,13 @@ class CruzVerdeScraper(BaseScraper):
 
     async def scrape(self, query: str) -> list[dict]:
         """
-        Navega na página de busca da Cruz Verde e extrai os produtos listados.
+        Navega na página de busca da Cruz Verde, carrega todos os resultados
+        via scroll infinito e visita cada página de produto para enriquecer os dados.
 
-        Retorna lista de dicts mapeados para os 16 campos do MedicamentoRecord.
-        Campos não extraídos pelo scraper atual retornam None:
-            ean_code, principio_activo, laboratorio, presentacion,
-            cantidad, dosis, is_bioequivalente, requiere_receta, url_image
+        Paginação: scroll infinito até estabilizar ou atingir MAX_PRODUCTS.
+        Enriquecimento: visita individual de cada produto para extrair
+            url_image, ean_code, principio_activo, laboratorio, presentacion,
+            cantidad, dosis, is_bioequivalente, requiere_receta.
 
         Args:
             query: Nome do medicamento. Ex: "Metformina 850mg"
@@ -128,87 +140,313 @@ class CruzVerdeScraper(BaseScraper):
             try:
                 await page.wait_for_selector(SELECTORS["price_current"], timeout=8_000)
             except PlaywrightTimeout:
-                pass  # Continua mesmo sem preços — alguns resultados podem ter
+                pass
 
-            # ── Extração ──
+            # ── Paginação via scroll infinito ──────────────────────────────
+            self.logger.info("Carregando todos os resultados via scroll...")
+            previous_count = 0
+            stable_rounds  = 0
+
+            while True:
+                current_count = len(await page.query_selector_all(SELECTORS["product_name"]))
+
+                if current_count >= MAX_PRODUCTS:
+                    self.logger.info("Limite de %d produtos atingido.", MAX_PRODUCTS)
+                    break
+
+                if current_count == previous_count:
+                    stable_rounds += 1
+                    if stable_rounds >= 3:
+                        # Contagem estável por 3 rounds consecutivos → sem mais resultados
+                        break
+                else:
+                    stable_rounds = 0
+
+                previous_count = current_count
+
+                # Scroll até o fim da página
+                await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+                await page.wait_for_timeout(1500)
+
             name_elements = await page.query_selector_all(SELECTORS["product_name"])
-            self.logger.info("%d cards de produto encontrados.", len(name_elements))
+            self.logger.info(
+                "Total de cards após scroll: %d (limite: %d)",
+                len(name_elements), MAX_PRODUCTS
+            )
 
+            # ── Extração da página de busca ────────────────────────────────
             scraped_at = _utcnow_iso()
+            raw_cards: list[dict] = []
 
-            for name_el in name_elements:
+            for name_el in name_elements[:MAX_PRODUCTS]:
                 try:
-                    # Sobe 4 níveis para o container do card
                     container = await name_el.evaluate_handle(
                         "el => el.parentElement.parentElement.parentElement.parentElement"
                     )
 
-                    # Nome do produto
                     name = (await name_el.inner_text()).strip()
                     if not name:
                         continue
 
-                    # Preços
-                    price_el = await container.query_selector(SELECTORS["price_current"])
+                    price_el  = await container.query_selector(SELECTORS["price_current"])
                     price_raw = (await price_el.inner_text()).strip() if price_el else ""
 
-                    orig_el = await container.query_selector(SELECTORS["price_original"])
+                    orig_el  = await container.query_selector(SELECTORS["price_original"])
                     orig_raw = (await orig_el.inner_text()).strip() if orig_el else ""
 
                     precio_actual   = _parse_price(price_raw)
                     precio_original = _parse_price(orig_raw)
 
                     if precio_actual is None:
-                        continue  # Sem preço → descarta
+                        continue
 
-                    # Se não há preço riscado, precio_original = precio_actual
                     if precio_original is None:
                         precio_original = precio_actual
 
-                    # URL do produto (âncora dentro do card)
                     product_url = await container.evaluate(
                         "el => { const a = el.querySelector('a[href]'); "
                         "return a ? a.href : null; }"
                     )
 
-                    # SKU extraído do número final da URL do produto
-                    sku = _extract_sku(product_url)
+                    # url_image da página de busca (thumbnail do card)
+                    url_image_search = await container.evaluate(
+                        "el => { const img = el.querySelector('img[src]'); "
+                        "return img ? img.src : null; }"
+                    )
 
-                    # ── Mapeamento para MedicamentoRecord (16 campos) ──
-                    results.append({
-                        # Identificação
-                        "sku":               sku,
-                        "ean_code":          None,           # TODO: buscar em ld+json
-
-                        # Produto
-                        "nombre_producto":   name,
-                        "principio_activo":  None,           # TODO: extrair da página do produto
-                        "laboratorio":       None,           # TODO: extrair da página do produto
-                        "presentacion":      None,           # TODO: extrair da página do produto
-                        "cantidad":          None,           # TODO: extrair do nome ou página
-                        "dosis":             None,           # TODO: extrair do nome ou página
-
-                        # Regulatório
-                        "is_bioequivalente": False,          # TODO: detectar selo na página
-                        "requiere_receta":   False,          # TODO: detectar aviso na página
-
-                        # Farmácia e preços
-                        "farmacia_id":       self.farmacia_id,
-                        "precio_original":   precio_original,
-                        "precio_actual":     precio_actual,
-
-                        # URLs
-                        "url_product":       product_url or url,
-                        "url_image":         None,           # TODO: extrair src da imagem do card
-
-                        # Metadados
-                        "scraped_at":        scraped_at,
+                    raw_cards.append({
+                        "sku":             _extract_sku(product_url),
+                        "nombre_producto": name,
+                        "precio_original": precio_original,
+                        "precio_actual":   precio_actual,
+                        "url_product":     product_url or url,
+                        "url_image":       url_image_search,
                     })
 
                 except Exception as exc:
-                    self.logger.warning("Erro ao parsear card: %s", exc)
+                    self.logger.warning("Erro ao parsear card da busca: %s", exc)
                     continue
 
+            self.logger.info(
+                "%d produtos extraídos da página de busca. Iniciando visitas individuais...",
+                len(raw_cards)
+            )
+
+            # ── Visita individual para enriquecimento ──────────────────────
+            detail_page = await context.new_page()
+            await detail_page.add_init_script(
+                "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
+            )
+
+            for i, card in enumerate(raw_cards):
+                product_url = card.get("url_product")
+
+                # Inicializa campos de detalhe com None
+                detail: dict = {
+                    "ean_code":          None,
+                    "principio_activo":  None,
+                    "laboratorio":       None,
+                    "presentacion":      None,
+                    "cantidad":          None,
+                    "dosis":             None,
+                    "is_bioequivalente": False,
+                    "requiere_receta":   False,
+                    "url_image":         card.get("url_image"),  # fallback thumbnail
+                }
+
+                # Só visita se tiver URL de produto individual (não search URL)
+                if not product_url or "search?" in product_url:
+                    results.append(self._build_record(card, detail, scraped_at))
+                    continue
+
+                try:
+                    await detail_page.goto(
+                        product_url, wait_until="domcontentloaded", timeout=20_000
+                    )
+                    await detail_page.wait_for_timeout(1000)
+
+                    # url_image — imagem principal em alta resolução
+                    try:
+                        img_url = await detail_page.evaluate("""
+                            () => {
+                                const img = document.querySelector(
+                                    'img.product-image, .product-gallery img, '
+                                    + '.product-detail img, picture img, '
+                                    + 'img[class*="product"], img[class*="main"]'
+                                );
+                                return img ? (img.dataset.src || img.src) : null;
+                            }
+                        """)
+                        if img_url:
+                            detail["url_image"] = img_url
+                    except Exception as exc:
+                        self.logger.warning("[%d] url_image: %s", i, exc)
+
+                    # ean_code — atributo data-ean / data-barcode / ld+json gtin13
+                    try:
+                        ean = await detail_page.evaluate("""
+                            () => {
+                                // Tenta data attributes
+                                const el = document.querySelector(
+                                    '[data-ean], [data-barcode], [data-gtin]'
+                                );
+                                if (el) return el.dataset.ean || el.dataset.barcode || el.dataset.gtin;
+                                // Tenta ld+json
+                                const scripts = document.querySelectorAll(
+                                    'script[type="application/ld+json"]'
+                                );
+                                for (const s of scripts) {
+                                    try {
+                                        const data = JSON.parse(s.textContent);
+                                        if (data.gtin13) return data.gtin13;
+                                        if (data.gtin)   return data.gtin;
+                                    } catch(e) {}
+                                }
+                                return null;
+                            }
+                        """)
+                        if ean:
+                            detail["ean_code"] = str(ean).strip() or None
+                    except Exception as exc:
+                        self.logger.warning("[%d] ean_code: %s", i, exc)
+
+                    # Extrai texto de seções de especificação do produto
+                    # usando uma função genérica que busca por label e retorna o valor
+                    try:
+                        specs = await detail_page.evaluate("""
+                            () => {
+                                const result = {};
+                                // Padrão 1: <dt>Label</dt><dd>Valor</dd>
+                                document.querySelectorAll('dt').forEach(dt => {
+                                    const label = dt.textContent.trim().toLowerCase();
+                                    const dd = dt.nextElementSibling;
+                                    if (dd) result[label] = dd.textContent.trim();
+                                });
+                                // Padrão 2: divs/spans com class contendo label
+                                document.querySelectorAll(
+                                    '[class*="spec"], [class*="detail"], [class*="attribute"], '
+                                    + '[class*="feature"], [class*="info"]'
+                                ).forEach(el => {
+                                    const text = el.textContent.trim();
+                                    const lower = text.toLowerCase();
+                                    // Captura pares "Label: Valor" em texto corrido
+                                    const match = text.match(/^([^:]{3,40}):\\s*(.+)$/);
+                                    if (match) result[match[1].trim().toLowerCase()] = match[2].trim();
+                                });
+                                return result;
+                            }
+                        """)
+
+                        def _find(keys: list[str]) -> Optional[str]:
+                            """Busca valor no dict de specs por múltiplos sinônimos."""
+                            for key in keys:
+                                for spec_key, val in specs.items():
+                                    if key in spec_key and val:
+                                        return val.strip() or None
+                            return None
+
+                        detail["principio_activo"] = _find([
+                            "principio activo", "principio", "composici", "activo"
+                        ])
+                        detail["laboratorio"] = _find([
+                            "laboratorio", "fabricante", "laborat"
+                        ])
+                        detail["presentacion"] = _find([
+                            "forma farmacéutica", "forma farmaceutica",
+                            "presentaci", "forma"
+                        ])
+                        cantidad_raw = _find(["cantidad", "unidades", "contenido"])
+                        detail["cantidad"] = _parse_int(cantidad_raw)
+                        detail["dosis"] = _find([
+                            "concentración", "concentracion", "dosis", "dosificaci"
+                        ])
+
+                    except Exception as exc:
+                        self.logger.warning("[%d] specs: %s", i, exc)
+
+                    # is_bioequivalente — texto ou imagen com "bioequivalente"
+                    try:
+                        is_bio = await detail_page.evaluate("""
+                            () => {
+                                const text = document.body.innerText.toLowerCase();
+                                if (text.includes('bioequivalente')) return true;
+                                const imgs = document.querySelectorAll('img[alt], img[src]');
+                                for (const img of imgs) {
+                                    const alt = (img.alt || img.src || '').toLowerCase();
+                                    if (alt.includes('bioequivalente')) return true;
+                                }
+                                return false;
+                            }
+                        """)
+                        detail["is_bioequivalente"] = bool(is_bio)
+                    except Exception as exc:
+                        self.logger.warning("[%d] is_bioequivalente: %s", i, exc)
+
+                    # requiere_receta — texto "requiere receta" ou "venta bajo receta"
+                    try:
+                        req_receta = await detail_page.evaluate("""
+                            () => {
+                                const text = document.body.innerText.toLowerCase();
+                                return (
+                                    text.includes('requiere receta') ||
+                                    text.includes('venta bajo receta') ||
+                                    text.includes('receta médica')
+                                );
+                            }
+                        """)
+                        detail["requiere_receta"] = bool(req_receta)
+                    except Exception as exc:
+                        self.logger.warning("[%d] requiere_receta: %s", i, exc)
+
+                except PlaywrightTimeout:
+                    self.logger.warning(
+                        "[%d] Timeout na página do produto: %s", i, product_url
+                    )
+                except Exception as exc:
+                    self.logger.warning(
+                        "[%d] Erro ao visitar produto %s: %s", i, product_url, exc
+                    )
+
+                results.append(self._build_record(card, detail, scraped_at))
+
+                if (i + 1) % 10 == 0:
+                    self.logger.info("Progresso: %d/%d produtos enriquecidos", i + 1, len(raw_cards))
+
+            await detail_page.close()
             await browser.close()
 
+        self.logger.info("Extração concluída — %d produtos no total.", len(results))
         return results
+
+    @staticmethod
+    def _build_record(card: dict, detail: dict, scraped_at: str) -> dict:
+        """Monta o dict final com os 16 campos do MedicamentoRecord."""
+        return {
+            # Identificação
+            "sku":               card.get("sku"),
+            "ean_code":          detail.get("ean_code"),
+
+            # Produto
+            "nombre_producto":   card.get("nombre_producto"),
+            "principio_activo":  detail.get("principio_activo"),
+            "laboratorio":       detail.get("laboratorio"),
+            "presentacion":      detail.get("presentacion"),
+            "cantidad":          detail.get("cantidad"),
+            "dosis":             detail.get("dosis"),
+
+            # Regulatório
+            "is_bioequivalente": detail.get("is_bioequivalente", False),
+            "requiere_receta":   detail.get("requiere_receta", False),
+
+            # Farmácia e preços
+            "farmacia_id":       "cruz_verde",
+            "precio_original":   card.get("precio_original"),
+            "precio_actual":     card.get("precio_actual"),
+
+            # URLs
+            "url_product":       card.get("url_product"),
+            "url_image":         detail.get("url_image"),
+
+            # Metadados
+            "scraped_at":        scraped_at,
+        }
