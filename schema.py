@@ -212,6 +212,102 @@ def record_to_dict(record: MedicamentoRecord) -> dict:
     return asdict(record)
 
 
+def infer_from_nombre(nombre_producto: str) -> dict:
+    """
+    Infere principio_activo, dosis, cantidad e presentacion a partir do
+    nombre_producto usando regex — sem acesso à página do produto.
+
+    Útil como fallback quando os scrapers não conseguem extrair esses
+    campos das páginas individuais (SPAs com dados não acessíveis via CSS).
+
+    Padrões reconhecidos (exemplos):
+        "Metformina 850 mg 30 Comprimidos"
+            → principio_activo="Metformina", dosis="850 mg", cantidad=30,
+              presentacion="Comprimidos"
+        "Glafornil Metformina 850 mg 60 Comprimidos Recubiertos"
+            → principio_activo="Metformina" (última palavra antes do número),
+              dosis="850 mg", cantidad=60, presentacion="Comprimidos Recubiertos"
+        "Amoxicilina 500 mg 21 Cápsulas"
+            → principio_activo="Amoxicilina", dosis="500 mg", cantidad=21,
+              presentacion="Cápsulas"
+        "Ibuprofeno 5mg/ml Solución 100 ml"
+            → principio_activo="Ibuprofeno", dosis="5mg/ml", cantidad=100,
+              presentacion="Solución"
+
+    Returns:
+        dict com chaves: principio_activo, dosis, cantidad, presentacion.
+        Campos não encontrados → None.
+        Nunca lança exceção.
+    """
+    import re as _re
+
+    result: dict = {
+        "principio_activo": None,
+        "dosis":            None,
+        "cantidad":         None,
+        "presentacion":     None,
+    }
+
+    if not nombre_producto or not str(nombre_producto).strip():
+        return result
+
+    try:
+        nombre = str(nombre_producto).strip()
+
+        # ── dosis ─────────────────────────────────────────────────────────────
+        # Captura: número + unidade (mg, mcg, g, ml, UI, %) com opcional /via
+        # Ex: "850 mg", "5mg/ml", "500mg", "10 mcg/dosis", "0,5 mg"
+        dosis_match = _re.search(
+            r"\b(\d+(?:[.,]\d+)?\s*(?:mg|mcg|µg|g(?!\w)|ml|UI|ui|%)"
+            r"(?:/(?:ml|g|kg|comp(?:rimido)?|tab(?:leta)?|amp(?:olla)?|dosi?s?))?)",
+            nombre, _re.IGNORECASE,
+        )
+        if dosis_match:
+            result["dosis"] = dosis_match.group(1).strip()
+
+        # ── cantidad + presentacion ────────────────────────────────────────────
+        # Captura: número seguido de palavra de apresentação farmacêutica
+        # Incluir formas compostas ("Comprimidos Recubiertos") via grupo extra
+        _PRES = (
+            r"comprimidos?\s+recubiertos?|comprimidos?\s+masticables?|"
+            r"comprimidos?\s+efervescentes?|comprimidos?\s+dispersables?|"
+            r"comprimidos?\s+de\s+liberaci[oó]n\s+prolongada|"
+            r"comprimidos?|"
+            r"c[aá]psulas?\s+blandas?|c[aá]psulas?|capsulas?|"
+            r"tabletas?\s+recubiertas?|tabletas?|grageas?|"
+            r"sobres?|ampollas?|viales?|frascos?|"
+            r"jarabe|soluci[oó]n|suspensi[oó]n|"
+            r"crema|gel|ung[üu]ento|pomada|parche|"
+            r"gotas?|spray|aerosol|inhalador|"
+            r"supositorios?|[oó]vulos?"
+        )
+        cant_match = _re.search(
+            rf"\b(\d+)\s+({_PRES})\b",
+            nombre, _re.IGNORECASE,
+        )
+        if cant_match:
+            result["cantidad"]     = int(cant_match.group(1))
+            result["presentacion"] = cant_match.group(2).strip()
+
+        # ── principio_activo ──────────────────────────────────────────────────
+        # Estratégia: pegar tudo antes da primeira ocorrência de dígito,
+        # depois extrair a ÚLTIMA palavra (ignora nome comercial que precede).
+        # Ex: "Glafornil Metformina 850 mg..." → words=["Glafornil","Metformina"]
+        #     → última = "Metformina"
+        first_digit = _re.search(r"\b\d", nombre)
+        if first_digit:
+            before = nombre[: first_digit.start()].strip()
+            if before:
+                words = [w.strip("(),;") for w in before.split() if w.strip("(),;")]
+                if words:
+                    result["principio_activo"] = words[-1] or None
+
+    except Exception:
+        pass  # Tolerante a qualquer falha
+
+    return result
+
+
 # ── Self-test ─────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
@@ -303,6 +399,55 @@ if __name__ == "__main__":
         assert False, "Deveria ter lançado ValueError"
     except ValueError as e:
         print(f"    ValueError: {e}  ✓ OK")
+
+    # Teste 8: infer_from_nombre — casos comuns
+    print("\n[8] infer_from_nombre — casos variados:")
+    cases = [
+        (
+            "Metformina 850 mg 30 Comprimidos",
+            {"principio_activo": "Metformina", "dosis": "850 mg",
+             "cantidad": 30, "presentacion": "Comprimidos"},
+        ),
+        (
+            "Glafornil Metformina 850 mg 60 Comprimidos Recubiertos",
+            {"principio_activo": "Metformina", "dosis": "850 mg",
+             "cantidad": 60, "presentacion": "Comprimidos Recubiertos"},
+        ),
+        (
+            "Amoxicilina 500 mg 21 Cápsulas",
+            {"principio_activo": "Amoxicilina", "dosis": "500 mg",
+             "cantidad": 21, "presentacion": "Cápsulas"},
+        ),
+        (
+            "Ibuprofeno 5mg/ml Solución 100 ml",
+            {"principio_activo": "Ibuprofeno", "dosis": "5mg/ml",
+             "cantidad": None, "presentacion": None},
+        ),
+        (
+            "Producto sin datos",
+            {"principio_activo": None, "dosis": None,
+             "cantidad": None, "presentacion": None},
+        ),
+    ]
+    all_ok = True
+    for nombre, expected in cases:
+        got = infer_from_nombre(nombre)
+        ok = all(got.get(k) == v for k, v in expected.items())
+        status = "✓" if ok else "✗"
+        print(f"    {status} '{nombre}'")
+        if not ok:
+            all_ok = False
+            for k, v in expected.items():
+                if got.get(k) != v:
+                    print(f"        {k}: esperado={v!r}, obtido={got.get(k)!r}")
+    assert all_ok, "Alguns casos de infer_from_nombre falharam"
+
+    # Teste 9: infer_from_nombre — tolerância a falhas
+    print("\n[9] infer_from_nombre com entradas inválidas (nunca lança exceção):")
+    for bad in [None, "", "   ", 123, []]:
+        r = infer_from_nombre(bad)
+        assert r == {"principio_activo": None, "dosis": None, "cantidad": None, "presentacion": None}
+    print("    ✓ OK — todas as entradas inválidas retornaram dict com None")
 
     print("\n" + "=" * 60)
     print("Todos os testes passaram ✓")

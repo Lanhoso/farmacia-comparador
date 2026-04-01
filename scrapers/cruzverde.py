@@ -16,6 +16,7 @@ from typing import Optional
 from urllib.parse import quote
 
 from scrapers.base_scraper import BaseScraper
+from schema import infer_from_nombre
 
 # ── Configuração ──────────────────────────────────────────────────────────────
 
@@ -256,7 +257,9 @@ class CruzVerdeScraper(BaseScraper):
 
                 # Só visita se tiver URL de produto individual (não search URL)
                 if not product_url or "search?" in product_url:
-                    results.append(self._build_record(card, detail, scraped_at))
+                    record = self._build_record(card, detail, scraped_at)
+                    self._apply_inferred(record)
+                    results.append(record)
                     continue
 
                 try:
@@ -413,7 +416,9 @@ class CruzVerdeScraper(BaseScraper):
                         "[%d] Erro ao visitar produto %s: %s", i, product_url, exc
                     )
 
-                results.append(self._build_record(card, detail, scraped_at))
+                record = self._build_record(card, detail, scraped_at)
+                self._apply_inferred(record)
+                results.append(record)
 
                 if (i + 1) % 10 == 0:
                     self.logger.info("Progresso: %d/%d produtos enriquecidos", i + 1, len(raw_cards))
@@ -423,6 +428,18 @@ class CruzVerdeScraper(BaseScraper):
 
         self.logger.info("Extração concluída — %d produtos no total.", len(results))
         return results
+
+    @staticmethod
+    def _apply_inferred(record: dict) -> None:
+        """
+        Preenche campos None do record com valores inferidos via infer_from_nombre().
+        Dados extraídos da página têm sempre prioridade — só preenche onde record[field] is None.
+        Modifica o dict in-place.
+        """
+        inferred = infer_from_nombre(record.get("nombre_producto") or "")
+        for field, value in inferred.items():
+            if record.get(field) is None and value is not None:
+                record[field] = value
 
     @staticmethod
     def _build_record(card: dict, detail: dict, scraped_at: str) -> dict:
