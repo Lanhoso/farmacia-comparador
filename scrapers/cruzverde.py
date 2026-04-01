@@ -48,6 +48,19 @@ def _parse_price(raw: str) -> Optional[int]:
     return int(digits) if digits else None
 
 
+def _extract_sku(url: Optional[str]) -> Optional[str]:
+    """
+    Extrai o SKU do produto a partir da URL da Cruz Verde.
+
+    Ex: 'https://www.cruzverde.cl/metformina-850-mg-60-comprimidos/270505.html'
+         → '270505'
+    """
+    if not url:
+        return None
+    match = re.search(r"/(\d+)\.html$", url)
+    return match.group(1) if match else None
+
+
 def _utcnow_iso() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
 
@@ -158,10 +171,13 @@ class CruzVerdeScraper(BaseScraper):
                         "return a ? a.href : null; }"
                     )
 
+                    # SKU extraído do número final da URL do produto
+                    sku = _extract_sku(product_url)
+
                     # ── Mapeamento para MedicamentoRecord (16 campos) ──
                     results.append({
                         # Identificação
-                        "sku":               None,           # TODO: extrair da URL do produto
+                        "sku":               sku,
                         "ean_code":          None,           # TODO: buscar em ld+json
 
                         # Produto
