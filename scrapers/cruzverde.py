@@ -283,7 +283,15 @@ class CruzVerdeScraper(BaseScraper):
                                 for (const s of scripts) {
                                     try {
                                         const data = JSON.parse(s.textContent);
+                                        // Padrão 1: objeto Product no nível raiz
                                         if (data['@type'] === 'Product') return data;
+                                        // Padrão 2: Product dentro de @graph[]
+                                        if (Array.isArray(data['@graph'])) {
+                                            const node = data['@graph'].find(
+                                                n => n['@type'] === 'Product'
+                                            );
+                                            if (node) return node;
+                                        }
                                     } catch(e) {}
                                 }
                                 return null;
@@ -312,11 +320,20 @@ class CruzVerdeScraper(BaseScraper):
                         elif isinstance(brand, str) and brand.strip():
                             detail["laboratorio"] = brand.strip()
 
-                    # ean_code — JSON-LD gtin13/gtin (EAN raramente presente na Cruz Verde)
+                    # ean_code — gtin13 é a prioridade máxima (EAN-13, identificador
+                    # universal do produto farmacêutico); fallbacks: gtin, gtin8
                     if ld_data:
-                        ean = ld_data.get("gtin13") or ld_data.get("gtin") or ld_data.get("gtin8")
+                        ean = (
+                            ld_data.get("gtin13")
+                            or ld_data.get("gtin")
+                            or ld_data.get("gtin8")
+                        )
                         if ean:
                             detail["ean_code"] = str(ean).strip() or None
+                            self.logger.info(
+                                "[%d] SKU %s — ean_code (gtin13): %s",
+                                i, card.get("sku"), detail["ean_code"],
+                            )
 
                     # ── Extração via texto visível da página (body.innerText) ──
                     # O site é Angular SPA — dados farmacêuticos aparecem no texto renderizado
