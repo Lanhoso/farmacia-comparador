@@ -392,6 +392,26 @@
       content: '★';
       font-size: .7rem;
     }
+    .badge-unit {
+      display: inline-flex;
+      align-items: center;
+      gap: .25rem;
+      background: var(--blue-100);
+      color: var(--blue-700);
+      font-size: .68rem;
+      font-weight: 700;
+      padding: .2rem .55rem;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      white-space: nowrap;
+    }
+    .badge-unit::before { content: '⬇'; font-size: .7rem; }
+
+    .unit-price {
+      font-size: .85rem;
+      color: var(--gray-500);
+    }
 
     .btn-buy {
       display: inline-flex;
@@ -489,7 +509,7 @@
       .stats-row { grid-template-columns: repeat(2, 1fr); gap: .75rem; }
       .table-wrap { overflow-x: auto; }
       table { min-width: 640px; }
-      .col-lab { display: none; }
+      .col-lab, .col-unit { display: none; }
       .filters-bar { padding: .75rem 1rem; }
       .results-count { width: 100%; text-align: right; }
     }
@@ -613,51 +633,20 @@
   100% independiente
 </footer>
 
-<!-- ── Data ────────────────────────────────────────────────────── -->
-<!-- INLINE_DATA_START -->
-<script>window.SCRAPED_DATA = {"query": "Metformina 850mg", "generated_at": "2026-03-30T23:55:01.170209+00:00", "count": 12, "results": [{"pharmacy": "Cruz Verde", "drug_name": "Metformina 850 mg 60 Comprimidos", "price_clp": 5032, "original_price_clp": 6290, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Metformina 850 mg 30 Comprimidos", "price_clp": 2712, "original_price_clp": 3390, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Glimefor 850 Metformina 850 mg 60 Comprimidos Recubiertos", "price_clp": 10003, "original_price_clp": 14290, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Glimefor 850 Metformina 850 mg 30 Comprimidos Recubiertos", "price_clp": 4473, "original_price_clp": 6390, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Glaupax 850 Metformina 850 mg 30 Comprimidos Recubiertos", "price_clp": 5518, "original_price_clp": 8490, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Glucophage Metformina 850 mg 30 Comprimidos", "price_clp": 13221, "original_price_clp": 20340, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Glifortex Metformina 850 mg 30 Comprimidos", "price_clp": 12698, "original_price_clp": 18140, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Glafornil Metformina 850 mg 30 Comprimidos Recubiertos", "price_clp": 15008, "original_price_clp": 23090, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Glafornil Metformina 850 mg 60 Comprimidos Recubiertos", "price_clp": 19493, "original_price_clp": 29990, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Glicenex Metformina 850 mg 30 Comprimidos Recubiertos", "price_clp": 7923, "original_price_clp": 12190, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Hipoglucin Metformina 850 mg 60 Comprimidos Recubiertos", "price_clp": 16653, "original_price_clp": 23790, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}, {"pharmacy": "Cruz Verde", "drug_name": "Vildagliptina 50 mg Metformina Clorhidrato 850 mg 60 Comprimidos", "price_clp": 36263, "original_price_clp": 55790, "url": "https://www.cruzverde.cl/search?query=Metformina%20850mg", "scraped_at": "2026-03-30T23:55:01.082951+00:00"}]};</script>
-<!-- INLINE_DATA_END -->
-
 <!-- ── Script ───────────────────────────────────────────────────── -->
 <script>
-  /* ── Suggestions ── */
-  const SUGGESTIONS = [
-    'Metformina 850mg', 'Metformina 500mg',
-    'Losartan 50mg', 'Losartan 100mg',
-    'Atorvastatina 20mg', 'Atorvastatina 40mg',
-    'Omeprazol 20mg', 'Omeprazol 40mg',
-    'Ibuprofeno 400mg', 'Ibuprofeno 600mg',
-    'Paracetamol 500mg', 'Paracetamol 1g',
-    'Amoxicilina 500mg', 'Amoxicilina 875mg',
-  ];
-
-  /* ── Lab lookup (enrich mock data) ── */
-  const LAB_MAP = {
-    'Glimefor':    'Andrómaco',
-    'Glaupax':     'Saval',
-    'Glucophage':  'Merck',
-    'Glifortex':   'Recalcine',
-    'Glafornil':   'Sandoz',
-    'Glicenex':    'Chile',
-    'Hipoglucin':  'Biosano',
-    'Vildagliptina': 'Novartis',
-    'Metformina':  'Genérico',
+  /* ── Supabase config ─────────────────────────────────────────── */
+  const SUPABASE_URL      = 'https://fvxposzqfxytjtvrswvh.supabase.co';
+  const SUPABASE_ANON_KEY = 'COLE_A_ANON_KEY_AQUI';
+  const HEADERS = {
+    'apikey':        SUPABASE_ANON_KEY,
+    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+    'Content-Type':  'application/json',
   };
 
-  function extractBrand(name) {
-    const words = name.trim().split(/\s+/);
-    const first = words[0];
-    if (/^\d/.test(first)) return 'Genérico';
-    return first;
-  }
-
-  function extractLab(name) {
-    const brand = extractBrand(name);
-    return LAB_MAP[brand] || LAB_MAP[name.split(/\s+/)[0]] || 'Genérico';
-  }
-
+  /* ── Helpers ─────────────────────────────────────────────────── */
   function formatCLP(n) {
-    return '$' + n.toLocaleString('es-CL');
+    return '$' + Math.round(n).toLocaleString('es-CL');
   }
 
   function formatDate(iso) {
@@ -667,47 +656,85 @@
     });
   }
 
-  /* ── State ── */
-  let allResults   = [];
-  let sortAsc      = true;
-  let filterLab    = '';
-  let filterFarm   = '';
+  // "cruz_verde" → "Cruz Verde"
+  function formatFarmacia(id) {
+    if (!id) return '—';
+    return id.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  }
 
-  /* ── Render table ── */
+  // "Comprimidos" → "comp."
+  function unitAbbr(presentacion) {
+    if (!presentacion) return 'unid.';
+    const p = presentacion.toLowerCase();
+    if (p.includes('comp'))                          return 'comp.';
+    if (p.includes('cáps') || p.includes('caps'))   return 'cáps.';
+    if (p.includes('tab'))                           return 'tab.';
+    if (p.includes('sobre'))                         return 'sobre';
+    if (p.includes('amp'))                           return 'amp.';
+    if (p.includes('ml'))                            return 'ml';
+    return 'unid.';
+  }
+
+  /* ── State ───────────────────────────────────────────────────── */
+  let allResults = [];
+  let sortAsc    = true;
+  let filterLab  = '';
+  let filterFarm = '';
+
+  /* ── Render table ────────────────────────────────────────────── */
   function renderTable() {
     let rows = allResults
-      .filter(r => (!filterLab  || r._lab  === filterLab)
-                && (!filterFarm || r.pharmacy === filterFarm));
+      .filter(r => (!filterLab  || r.laboratorio === filterLab)
+                && (!filterFarm || r._pharmacy   === filterFarm));
 
     rows.sort((a, b) => sortAsc
-      ? (a.price_clp || 0) - (b.price_clp || 0)
-      : (b.price_clp || 0) - (a.price_clp || 0));
+      ? (a.precio_actual || 0) - (b.precio_actual || 0)
+      : (b.precio_actual || 0) - (a.precio_actual || 0));
 
     document.getElementById('results-count').textContent =
       rows.length + ' resultado' + (rows.length !== 1 ? 's' : '');
 
-    const minPrice = Math.min(...rows.map(r => r.price_clp).filter(Boolean));
+    // Best absolute price
+    const prices   = rows.map(r => r.precio_actual).filter(Boolean);
+    const minPrice = prices.length ? Math.min(...prices) : null;
+
+    // Best price-per-unit (only rows with valid cantidad)
+    const unitRatios = rows
+      .filter(r => r.precio_actual && r.cantidad)
+      .map(r => r.precio_actual / r.cantidad);
+    const minUnit = unitRatios.length ? Math.min(...unitRatios) : null;
 
     const tbody = rows.map(r => {
-      const isBest = r.price_clp === minPrice;
-      const lab    = r._lab;
+      const isBest    = minPrice !== null && r.precio_actual === minPrice;
+      const unitRatio = (r.precio_actual && r.cantidad) ? r.precio_actual / r.cantidad : null;
+      const isBestUnit = minUnit !== null && unitRatio !== null
+                          && Math.abs(unitRatio - minUnit) < 0.01;
+      const lab       = r.laboratorio || '—';
+      const pharmacy  = r._pharmacy;
+
+      const unitPriceHtml = unitRatio !== null
+        ? `<span class="unit-price">${formatCLP(unitRatio)}/${unitAbbr(r.presentacion)}</span>`
+        : `<span class="unit-price" style="color:var(--gray-300)">—</span>`;
+
       return `
         <tr>
           <td>
-            <div class="drug-name">${r.drug_name}</div>
+            <div class="drug-name">${r.nombre_producto || '—'}</div>
           </td>
           <td class="col-lab"><span class="lab-tag">${lab}</span></td>
-          <td><span class="pharmacy-tag"><span class="pharmacy-dot"></span>${r.pharmacy}</span></td>
+          <td><span class="pharmacy-tag"><span class="pharmacy-dot"></span>${pharmacy}</span></td>
           <td>
             <div class="price-cell">
-              <span class="price-amount">${r.price_clp ? formatCLP(r.price_clp) : '—'}</span>
-              ${r.original_price_clp && r.original_price_clp > r.price_clp
-                ? `<span class="price-original">${formatCLP(r.original_price_clp)}</span>` : ''}
-              ${isBest ? '<span class="badge-best">Mejor precio</span>' : ''}
+              <span class="price-amount">${r.precio_actual ? formatCLP(r.precio_actual) : '—'}</span>
+              ${r.precio_original && r.precio_original > r.precio_actual
+                ? `<span class="price-original">${formatCLP(r.precio_original)}</span>` : ''}
+              ${isBest     ? '<span class="badge-best">Mejor precio</span>'        : ''}
+              ${isBestUnit ? '<span class="badge-unit">Mejor precio/unidad</span>' : ''}
             </div>
           </td>
+          <td class="col-unit">${unitPriceHtml}</td>
           <td>
-            <a class="btn-buy" href="${r.product_url || r.url}" target="_blank" rel="noopener">
+            <a class="btn-buy" href="${r.url_product || '#'}" target="_blank" rel="noopener">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
               </svg>
@@ -726,6 +753,7 @@
               <th class="col-lab">Laboratorio</th>
               <th>Farmacia</th>
               <th>Precio (CLP)</th>
+              <th class="col-unit">Precio/unidad</th>
               <th></th>
             </tr>
           </thead>
@@ -734,15 +762,14 @@
       </div>`;
   }
 
-  /* ── Populate filters ── */
+  /* ── Populate filters ────────────────────────────────────────── */
   function populateFilters(results) {
-    const labs  = [...new Set(results.map(r => r._lab))].sort();
-    const farms = [...new Set(results.map(r => r.pharmacy))].sort();
+    const labs  = [...new Set(results.map(r => r.laboratorio).filter(Boolean))].sort();
+    const farms = [...new Set(results.map(r => r._pharmacy))].sort();
 
     const labSel  = document.getElementById('filter-lab');
     const farmSel = document.getElementById('filter-farm');
 
-    // Reset dropdowns before populating (supports multiple searches)
     labSel.innerHTML  = '<option value="">Todos</option>';
     farmSel.innerHTML = '<option value="">Todas</option>';
 
@@ -761,7 +788,7 @@
     farmSel.onchange = e => { filterFarm = e.target.value; renderTable(); };
   }
 
-  /* ── Reset UI to empty state ── */
+  /* ── Reset UI ────────────────────────────────────────────────── */
   function resetUI() {
     filterLab  = '';
     filterFarm = '';
@@ -773,7 +800,7 @@
     document.getElementById('content').innerHTML = '';
   }
 
-  /* ── Show loading state ── */
+  /* ── Loading state ───────────────────────────────────────────── */
   function showLoading(query) {
     document.getElementById('content').innerHTML = `
       <div class="empty-state">
@@ -787,7 +814,7 @@
       </div>`;
   }
 
-  /* ── Show not found state ── */
+  /* ── Not found state ─────────────────────────────────────────── */
   function showNotFound(query) {
     document.getElementById('content').innerHTML = `
       <div class="empty-state">
@@ -801,70 +828,105 @@
       </div>`;
   }
 
-  /* ── Load data ── */
-  async function loadData(payload) {
-    if (!payload) return;
-
-    document.getElementById('query-label').textContent = payload.query || '—';
-    document.getElementById('timestamp-label').textContent =
-      payload.generated_at ? 'Actualizado: ' + formatDate(payload.generated_at) : '';
-
-    const results = (payload.results || []).map(r => ({
-      ...r,
-      _lab: extractLab(r.drug_name),
-    }));
-
-    if (!results.length) {
-      showNotFound(payload.query || '');
-      return;
-    }
-
-    allResults = results;
-
-    // Stats
-    const prices  = results.map(r => r.price_clp).filter(Boolean);
-    const minP    = Math.min(...prices);
-    const maxP    = Math.max(...prices);
-    document.getElementById('stat-count').textContent = results.length;
-    document.getElementById('stat-min').textContent   = formatCLP(minP);
-    document.getElementById('stat-max').textContent   = formatCLP(maxP);
-    document.getElementById('stat-diff').textContent  = formatCLP(maxP - minP);
-
-    document.getElementById('meta-bar').style.display    = '';
-    document.getElementById('stats-row').style.display   = '';
-    document.getElementById('filters-bar').style.display = '';
-
-    populateFilters(results);
-    renderTable();
+  /* ── Error state ─────────────────────────────────────────────── */
+  function showError() {
+    document.getElementById('content').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+        </div>
+        <h3>Error al cargar datos</h3>
+        <p>No se pudo conectar con la base de datos. Intenta nuevamente.</p>
+      </div>`;
   }
 
-  /* ── Sort button ── */
+  /* ── Handle search ───────────────────────────────────────────── */
+  async function handleSearch(query) {
+    const q = query.trim();
+    if (!q) return;
+    dropdown.classList.remove('open');
+    resetUI();
+    showLoading(q);
+
+    try {
+      // Encode only the user-supplied term; leave PostgREST syntax chars unencoded
+      const term = encodeURIComponent(q);
+      const url  = `${SUPABASE_URL}/rest/v1/precios_hoy`
+                 + `?select=*`
+                 + `&or=(nombre_producto.ilike.*${term}*,principio_activo.ilike.*${term}*,laboratorio.ilike.*${term}*)`;
+
+      const res  = await fetch(url, { headers: HEADERS });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+
+      if (!data.length) {
+        showNotFound(q);
+        return;
+      }
+
+      // Normalise: attach formatted pharmacy label
+      allResults = data.map(r => ({
+        ...r,
+        _pharmacy: formatFarmacia(r.farmacia_id),
+      }));
+
+      // Timestamp: use the most recent scraped_at in the result set
+      const latestAt = [...allResults]
+        .map(r => r.scraped_at)
+        .filter(Boolean)
+        .sort()
+        .at(-1);
+
+      document.getElementById('query-label').textContent = q;
+      document.getElementById('timestamp-label').textContent =
+        latestAt ? 'Actualizado: ' + formatDate(latestAt) : '';
+
+      // Stats cards
+      const prices = allResults.map(r => r.precio_actual).filter(Boolean);
+      const minP   = Math.min(...prices);
+      const maxP   = Math.max(...prices);
+      document.getElementById('stat-count').textContent = allResults.length;
+      document.getElementById('stat-min').textContent   = formatCLP(minP);
+      document.getElementById('stat-max').textContent   = formatCLP(maxP);
+      document.getElementById('stat-diff').textContent  = formatCLP(maxP - minP);
+
+      document.getElementById('meta-bar').style.display    = '';
+      document.getElementById('stats-row').style.display   = '';
+      document.getElementById('filters-bar').style.display = '';
+
+      populateFilters(allResults);
+      renderTable();
+
+    } catch (_) {
+      showError();
+    }
+  }
+
+  /* ── Sort button ─────────────────────────────────────────────── */
   document.getElementById('sort-btn').addEventListener('click', function () {
     sortAsc = !sortAsc;
-    this.textContent = '';
     this.innerHTML = `
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;transition:transform .2s;${sortAsc ? '' : 'transform:rotate(180deg)'}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+           style="width:14px;height:14px;transition:transform .2s;${sortAsc ? '' : 'transform:rotate(180deg)'}">
         <path d="M3 6h18M7 12h10M11 18h2"/>
       </svg>
       Precio: ${sortAsc ? 'menor primero' : 'mayor primero'}`;
     renderTable();
   });
 
-  /* ── Autocomplete ── */
+  /* ── Autocomplete ────────────────────────────────────────────── */
   const searchInput = document.getElementById('search-input');
   const dropdown    = document.getElementById('autocomplete-dropdown');
   let activeIdx     = -1;
+  let acTimer       = null;
 
-  function showSuggestions(val) {
-    const q = val.toLowerCase().trim();
-    const matches = q
-      ? SUGGESTIONS.filter(s => s.toLowerCase().includes(q))
-      : SUGGESTIONS.slice(0, 8);
+  function renderDropdown(suggestions) {
+    if (!suggestions.length) { dropdown.classList.remove('open'); return; }
 
-    if (!matches.length) { dropdown.classList.remove('open'); return; }
-
-    dropdown.innerHTML = matches.map((s, i) => `
-      <div class="autocomplete-item" data-idx="${i}" data-val="${s}">
+    dropdown.innerHTML = suggestions.map((s, i) => `
+      <div class="autocomplete-item" data-idx="${i}" data-val="${s.replace(/"/g, '&quot;')}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
         </svg>
@@ -884,9 +946,48 @@
     dropdown.classList.add('open');
   }
 
-  searchInput.addEventListener('input', e => showSuggestions(e.target.value));
-  searchInput.addEventListener('focus', e => showSuggestions(e.target.value));
-  searchInput.addEventListener('blur', () => setTimeout(() => dropdown.classList.remove('open'), 150));
+  async function fetchSuggestions(q) {
+    try {
+      const term = encodeURIComponent(q);
+      const url  = `${SUPABASE_URL}/rest/v1/precios_hoy`
+                 + `?select=nombre_producto`
+                 + `&nombre_producto=ilike.*${term}*`
+                 + `&limit=10`;
+
+      const res  = await fetch(url, { headers: HEADERS });
+      if (!res.ok) return;
+      const data = await res.json();
+
+      // Deduplicate preserving order
+      const seen = new Set();
+      const suggestions = [];
+      for (const row of data) {
+        const name = row.nombre_producto;
+        if (name && !seen.has(name)) {
+          seen.add(name);
+          suggestions.push(name);
+          if (suggestions.length >= 8) break;
+        }
+      }
+      renderDropdown(suggestions);
+    } catch (_) {}
+  }
+
+  searchInput.addEventListener('input', e => {
+    const q = e.target.value.trim();
+    clearTimeout(acTimer);
+    if (!q || q.length < 2) { dropdown.classList.remove('open'); return; }
+    acTimer = setTimeout(() => fetchSuggestions(q), 300);
+  });
+
+  searchInput.addEventListener('focus', e => {
+    const q = e.target.value.trim();
+    if (q.length >= 2) fetchSuggestions(q);
+  });
+
+  searchInput.addEventListener('blur', () =>
+    setTimeout(() => dropdown.classList.remove('open'), 150)
+  );
 
   searchInput.addEventListener('keydown', e => {
     if (e.key === 'Enter' && !dropdown.classList.contains('open')) {
@@ -902,9 +1003,7 @@
       e.preventDefault();
       activeIdx = (activeIdx - 1 + items.length) % items.length;
     } else if (e.key === 'Enter') {
-      if (activeIdx >= 0) {
-        searchInput.value = items[activeIdx].dataset.val;
-      }
+      if (activeIdx >= 0) searchInput.value = items[activeIdx].dataset.val;
       dropdown.classList.remove('open');
       handleSearch(searchInput.value);
       return;
@@ -914,52 +1013,7 @@
     }
     items.forEach((el, i) => el.classList.toggle('active', i === activeIdx));
   });
-
-  /* ── Generate slug matching scraper.py logic ── */
-  function toSlug(query) {
-    return query.toLowerCase().replace(/[^\w]/g, '_');
-  }
-
-  async function handleSearch(query) {
-    const q = query.trim();
-    if (!q) return;
-    dropdown.classList.remove('open');
-    resetUI();
-    showLoading(q);
-
-    // 1. Try fetching the JSON file for this specific query
-    const slug = toSlug(q);
-    try {
-      const r = await fetch(`data/${slug}.json`);
-      if (r.ok) {
-        const payload = await r.json();
-        await loadData(payload);
-        return;
-      }
-    } catch (_) {}
-
-    // 2. Fallback: check if embedded data matches the query
-    if (window.SCRAPED_DATA) {
-      const embedded = window.SCRAPED_DATA.query || '';
-      if (embedded.toLowerCase().includes(q.toLowerCase().split(' ')[0].toLowerCase())) {
-        await loadData(window.SCRAPED_DATA);
-        return;
-      }
-    }
-
-    // 3. No data found
-    showNotFound(q);
-  }
-
-  /* ── Init — start empty, wait for user search ── */
-  (function init() {
-    // Page starts clean — results only appear after a search
-  })();
 </script>
-
-<!-- ── Typeform Exit Intent ─────────────────────────────────────── -->
-<div data-tf-live="01KN2NGAS9T3K62G1SYGMA81B8"></div>
-<script src="//embed.typeform.com/next/embed.js"></script>
 
 </body>
 </html>
