@@ -24,7 +24,7 @@ from dataclasses import asdict
 from datetime import datetime, timezone
 
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
     datefmt="%Y-%m-%dT%H:%M:%S",
 )

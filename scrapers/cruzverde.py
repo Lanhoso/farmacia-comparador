@@ -263,138 +263,144 @@ class CruzVerdeScraper(BaseScraper):
                     await detail_page.goto(
                         product_url, wait_until="domcontentloaded", timeout=20_000
                     )
-                    await detail_page.wait_for_timeout(1000)
+                    await detail_page.wait_for_timeout(1500)
 
-                    # url_image — imagem principal em alta resolução
-                    try:
-                        img_url = await detail_page.evaluate("""
-                            () => {
-                                const img = document.querySelector(
-                                    'img.product-image, .product-gallery img, '
-                                    + '.product-detail img, picture img, '
-                                    + 'img[class*="product"], img[class*="main"]'
-                                );
-                                return img ? (img.dataset.src || img.src) : null;
-                            }
-                        """)
-                        if img_url:
-                            detail["url_image"] = img_url
-                    except Exception as exc:
-                        self.logger.warning("[%d] url_image: %s", i, exc)
+                    # ── Debug: imprime HTML completo do primeiro produto ──
+                    if i == 0:
+                        html_content = await detail_page.content()
+                        self.logger.debug("PAGE HTML (produto 0):\n%s", html_content)
 
-                    # ean_code — atributo data-ean / data-barcode / ld+json gtin13
+                    # ── Extração via JSON-LD (fonte principal de dados estruturados) ──
                     try:
-                        ean = await detail_page.evaluate("""
+                        ld_data = await detail_page.evaluate("""
                             () => {
-                                // Tenta data attributes
-                                const el = document.querySelector(
-                                    '[data-ean], [data-barcode], [data-gtin]'
-                                );
-                                if (el) return el.dataset.ean || el.dataset.barcode || el.dataset.gtin;
-                                // Tenta ld+json
                                 const scripts = document.querySelectorAll(
                                     'script[type="application/ld+json"]'
                                 );
                                 for (const s of scripts) {
                                     try {
                                         const data = JSON.parse(s.textContent);
-                                        if (data.gtin13) return data.gtin13;
-                                        if (data.gtin)   return data.gtin;
+                                        if (data['@type'] === 'Product') return data;
                                     } catch(e) {}
                                 }
                                 return null;
                             }
                         """)
+                    except Exception as exc:
+                        self.logger.warning("[%d] JSON-LD parse: %s", i, exc)
+                        ld_data = None
+
+                    # url_image — preferência: JSON-LD image; fallback: thumbnail do card
+                    # Filtra imagens genéricas (CintilloVertical é banner decorativo)
+                    if ld_data and ld_data.get("image"):
+                        img_candidate = ld_data["image"]
+                        if "CintilloVertical" not in img_candidate:
+                            detail["url_image"] = img_candidate
+                        else:
+                            detail["url_image"] = None
+                    elif detail.get("url_image") and "CintilloVertical" in detail["url_image"]:
+                        detail["url_image"] = None
+
+                    # laboratorio — JSON-LD brand.name ou brand (string)
+                    if ld_data:
+                        brand = ld_data.get("brand")
+                        if isinstance(brand, dict):
+                            detail["laboratorio"] = brand.get("name") or None
+                        elif isinstance(brand, str) and brand.strip():
+                            detail["laboratorio"] = brand.strip()
+
+                    # ean_code — JSON-LD gtin13/gtin (EAN raramente presente na Cruz Verde)
+                    if ld_data:
+                        ean = ld_data.get("gtin13") or ld_data.get("gtin") or ld_data.get("gtin8")
                         if ean:
                             detail["ean_code"] = str(ean).strip() or None
-                    except Exception as exc:
-                        self.logger.warning("[%d] ean_code: %s", i, exc)
 
-                    # Extrai texto de seções de especificação do produto
-                    # usando uma função genérica que busca por label e retorna o valor
+                    # ── Extração via texto visível da página (body.innerText) ──
+                    # O site é Angular SPA — dados farmacêuticos aparecem no texto renderizado
                     try:
-                        specs = await detail_page.evaluate("""
-                            () => {
-                                const result = {};
-                                // Padrão 1: <dt>Label</dt><dd>Valor</dd>
-                                document.querySelectorAll('dt').forEach(dt => {
-                                    const label = dt.textContent.trim().toLowerCase();
-                                    const dd = dt.nextElementSibling;
-                                    if (dd) result[label] = dd.textContent.trim();
-                                });
-                                // Padrão 2: divs/spans com class contendo label
-                                document.querySelectorAll(
-                                    '[class*="spec"], [class*="detail"], [class*="attribute"], '
-                                    + '[class*="feature"], [class*="info"]'
-                                ).forEach(el => {
-                                    const text = el.textContent.trim();
-                                    const lower = text.toLowerCase();
-                                    // Captura pares "Label: Valor" em texto corrido
-                                    const match = text.match(/^([^:]{3,40}):\\s*(.+)$/);
-                                    if (match) result[match[1].trim().toLowerCase()] = match[2].trim();
-                                });
-                                return result;
-                            }
-                        """)
-
-                        def _find(keys: list[str]) -> Optional[str]:
-                            """Busca valor no dict de specs por múltiplos sinônimos."""
-                            for key in keys:
-                                for spec_key, val in specs.items():
-                                    if key in spec_key and val:
-                                        return val.strip() or None
-                            return None
-
-                        detail["principio_activo"] = _find([
-                            "principio activo", "principio", "composici", "activo"
-                        ])
-                        detail["laboratorio"] = _find([
-                            "laboratorio", "fabricante", "laborat"
-                        ])
-                        detail["presentacion"] = _find([
-                            "forma farmacéutica", "forma farmaceutica",
-                            "presentaci", "forma"
-                        ])
-                        cantidad_raw = _find(["cantidad", "unidades", "contenido"])
-                        detail["cantidad"] = _parse_int(cantidad_raw)
-                        detail["dosis"] = _find([
-                            "concentración", "concentracion", "dosis", "dosificaci"
-                        ])
-
+                        body_text = await detail_page.evaluate(
+                            "() => document.body.innerText"
+                        )
                     except Exception as exc:
-                        self.logger.warning("[%d] specs: %s", i, exc)
+                        self.logger.warning("[%d] body_text: %s", i, exc)
+                        body_text = ""
 
-                    # is_bioequivalente — texto ou imagen com "bioequivalente"
+                    # principio_activo — padrão "PRINCIPIO ACTIVO\nVALOR" ou "Principio Activo: VALOR"
+                    if not detail.get("principio_activo"):
+                        match = re.search(
+                            r"principio\s+activo[:\s]+([A-ZÁÉÍÓÚÑa-záéíóúñ][^\n]{2,60})",
+                            body_text, re.IGNORECASE
+                        )
+                        if match:
+                            detail["principio_activo"] = match.group(1).strip() or None
+
+                    # laboratorio — padrão "LABORATORIO: VALOR" no body text (fallback)
+                    if not detail.get("laboratorio"):
+                        match = re.search(
+                            r"laboratorio[:\s]+([A-ZÁÉÍÓÚÑ][^\n]{2,60})",
+                            body_text, re.IGNORECASE
+                        )
+                        if match:
+                            detail["laboratorio"] = match.group(1).strip() or None
+
+                    # presentacion — padrão "Forma Farmacéutica\nComprimido"
+                    if not detail.get("presentacion"):
+                        match = re.search(
+                            r"forma\s+farmac[eé]utica[:\s]+([^\n]{3,60})",
+                            body_text, re.IGNORECASE
+                        )
+                        if not match:
+                            match = re.search(
+                                r"presentaci[oó]n[:\s]+([^\n]{3,60})",
+                                body_text, re.IGNORECASE
+                            )
+                        if match:
+                            detail["presentacion"] = match.group(1).strip() or None
+
+                    # cantidad — padrão "30 Comprimidos" ou "Contenido: 30"
+                    if detail.get("cantidad") is None:
+                        match = re.search(
+                            r"contenido[:\s]+(\d+)|(\d+)\s+(?:comprimidos?|cápsulas?|capsulas?|tabletas?|ml|g\b)",
+                            body_text, re.IGNORECASE
+                        )
+                        if match:
+                            qty_str = match.group(1) or match.group(2)
+                            detail["cantidad"] = _parse_int(qty_str)
+
+                    # dosis — padrão "Concentración: 850 mg" ou "850mg" no nome
+                    if not detail.get("dosis"):
+                        match = re.search(
+                            r"concentraci[oó]n[:\s]+([^\n]{2,40})",
+                            body_text, re.IGNORECASE
+                        )
+                        if not match:
+                            # Extrai dose do nome do produto (ex: "850 mg")
+                            match = re.search(
+                                r"(\d+(?:[.,]\d+)?\s*(?:mg|mcg|g|ml|UI|ui|%)[^\s,/]*)",
+                                card.get("nombre_producto", ""), re.IGNORECASE
+                            )
+                        if match:
+                            detail["dosis"] = match.group(1).strip() or None
+
+                    # is_bioequivalente — texto "bioequivalente" na página
                     try:
-                        is_bio = await detail_page.evaluate("""
-                            () => {
-                                const text = document.body.innerText.toLowerCase();
-                                if (text.includes('bioequivalente')) return true;
-                                const imgs = document.querySelectorAll('img[alt], img[src]');
-                                for (const img of imgs) {
-                                    const alt = (img.alt || img.src || '').toLowerCase();
-                                    if (alt.includes('bioequivalente')) return true;
-                                }
-                                return false;
-                            }
-                        """)
-                        detail["is_bioequivalente"] = bool(is_bio)
+                        is_bio = "bioequivalente" in body_text.lower()
+                        detail["is_bioequivalente"] = is_bio
                     except Exception as exc:
                         self.logger.warning("[%d] is_bioequivalente: %s", i, exc)
 
-                    # requiere_receta — texto "requiere receta" ou "venta bajo receta"
+                    # requiere_receta — texto "receta" na página
                     try:
-                        req_receta = await detail_page.evaluate("""
-                            () => {
-                                const text = document.body.innerText.toLowerCase();
-                                return (
-                                    text.includes('requiere receta') ||
-                                    text.includes('venta bajo receta') ||
-                                    text.includes('receta médica')
-                                );
-                            }
-                        """)
-                        detail["requiere_receta"] = bool(req_receta)
+                        body_lower = body_text.lower()
+                        req_receta = (
+                            "requiere receta" in body_lower
+                            or "venta bajo receta" in body_lower
+                            or "receta médica" in body_lower
+                            or "receta medica" in body_lower
+                            or "receta simple" in body_lower
+                            or "receta retenida" in body_lower
+                        )
+                        detail["requiere_receta"] = req_receta
                     except Exception as exc:
                         self.logger.warning("[%d] requiere_receta: %s", i, exc)
 
