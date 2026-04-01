@@ -1,11 +1,11 @@
 name: Scrape Pharmacy Prices
 
 on:
-  schedule:
-    - cron: '0 3 * * *'   # 00:00 Chile (UTC-3)
-    - cron: '0 9 * * *'   # 06:00 Chile (UTC-3)
-    - cron: '0 15 * * *'  # 12:00 Chile (UTC-3)
-    - cron: '0 21 * * *'  # 18:00 Chile (UTC-3)
+  # schedule:
+  #   - cron: '0 3 * * *'   # 00:00 Chile (UTC-3)
+  #   - cron: '0 9 * * *'   # 06:00 Chile (UTC-3)
+  #   - cron: '0 15 * * *'  # 12:00 Chile (UTC-3)
+  #   - cron: '0 21 * * *'  # 18:00 Chile (UTC-3)
   workflow_dispatch:       # Permite rodar manualmente
 
 jobs:
